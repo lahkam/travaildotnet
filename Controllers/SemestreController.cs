@@ -38,7 +38,7 @@ namespace isgasoir.Controllers
             {
                 return NotFound();
             }
-         /*   var @semestre = _unitOfWork.semestreRepository.findById(id);
+         /*   var @semestre = _unitOfWork.semestre_repository.findById(id);
             List<Module> ms = _unitOfWork.moduleRepository.findByCretiria(s => s.Sem.Id == id).ToList();
             @semestre.Modules = ms;*/
 
@@ -53,6 +53,17 @@ namespace isgasoir.Controllers
         }
 
 
+        // GET: api/semestre/filiere/5
+        [HttpGet("filiere/{filiereId}")]
+        public IActionResult GetByFiliere(long filiereId)
+        {
+            if (_unitOfWork.semestreRepository == null) return NotFound();
+            var list = _unitOfWork.semestreRepository.Query
+                        .Where(s => s.FiliereId == filiereId)
+                        .Include(s => s.Modules)
+                        .ToList();
+            return Ok(list);
+        }
 
         // POST: api/semestres
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
