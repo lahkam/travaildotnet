@@ -4,8 +4,11 @@
     {
         long id;
         string name = string.Empty;
-
         List<Module>? modules = new();
+        // foreign key to Filiere
+        public long? FiliereId { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        public Filiere? Filiere { get; set; }
        
 
         public long Id { get => id; set => id = value; }

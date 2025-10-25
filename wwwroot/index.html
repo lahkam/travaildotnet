@@ -99,6 +99,11 @@
     </div>
   </div>
 
+  <section class="card" style="max-width:1100px;margin:16px auto">
+    <h2>Structure hiérarchique</h2>
+    <div id="hierarchy"></div>
+  </section>
+
   <script>
     const apiBase = '';
     function confirmDelete(){ return confirm('Confirmer la suppression ?'); }
@@ -152,6 +157,12 @@
 
     // Initial load
     loadChapitres(); loadModules(); loadStudents(); loadSemestres(); loadFilieres();
+    // Hierarchy
+    async function loadHierarchy(){ const r = await safeFetch('/api/filiere'); if(!r) return; const list = await r.json(); const container = document.getElementById('hierarchy'); container.innerHTML=''; for(const f of list){ // fetch full tree for each filiere
+        const rf = await safeFetch('/api/filiere/' + f.id); if(!rf) continue; const full = await rf.json(); const el = document.createElement('div'); el.className='card'; let html = `<strong>${full.name}</strong><div class="muted">${full.description}</div>`; if(full.semestres && full.semestres.length){ html += '<div style="margin-top:8px">'; full.semestres.forEach(s => { html += `<div style="margin-left:8px"><strong>Semestre: ${s.name}</strong>`; if(s.modules && s.modules.length){ html += '<div style="margin-left:12px">'; s.modules.forEach(m=>{ html += `<div><em>Module: ${m.name}</em>`; if(m.chapitres && m.chapitres.length){ html += '<div style="margin-left:12px">'; m.chapitres.forEach(c=>{ html += `<div>Chapitre: ${c.title}`; if(c.activities && c.activities.length){ html += '<div style="margin-left:12px">'; c.activities.forEach(a=>{ html += `<div>Activity: ${a.title}</div>`; }); html += '</div>'; } html += '</div>'; }); html += '</div>'; } html += '</div>'; }); html += '</div>'; } html += '</div>'; } html += '</div>'; el.innerHTML = html; container.appendChild(el); }
+    }
+    document.getElementById('fil-refresh').addEventListener('click', loadHierarchy);
+    loadHierarchy();
   </script>
 </body>
 </html>
