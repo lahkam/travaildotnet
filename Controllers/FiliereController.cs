@@ -8,10 +8,12 @@ namespace isgasoir.Controllers
     public class FiliereController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
+        private readonly Microsoft.Extensions.Logging.ILogger<FiliereController> _logger;
 
-        public FiliereController(IUnitOfWork uow)
+        public FiliereController(IUnitOfWork uow, Microsoft.Extensions.Logging.ILogger<FiliereController> logger)
         {
             _uow = uow;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -32,9 +34,19 @@ namespace isgasoir.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] Filiere filiere)
         {
-            _uow.filiereRepository.add(filiere);
-            _uow.complete();
-            return CreatedAtAction(nameof(Get), new { id = filiere.Id }, filiere);
+            _logger.LogInformation("POST /api/filiere payload: {Payload}", System.Text.Json.JsonSerializer.Serialize(filiere));
+            try
+            {
+                _uow.filiereRepository.add(filiere);
+                _uow.complete();
+                _logger.LogInformation("Filiere created with id {Id}", filiere.Id);
+                return CreatedAtAction(nameof(Get), new { id = filiere.Id }, filiere);
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Error creating filiere");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPut("{id}")]

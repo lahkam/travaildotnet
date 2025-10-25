@@ -11,6 +11,7 @@ namespace isgasoir.Controllers
 
         // private readonly ApplicationContext _context;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly Microsoft.Extensions.Logging.ILogger<SemestreController> _logger;
 
         public SemestreController(IUnitOfWork unitOfWork)
         {
