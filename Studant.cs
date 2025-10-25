@@ -3,11 +3,12 @@
     public class Studant
     {
         long id;
-        string nom, prenom;
+        string nom = string.Empty;
+        string prenom = string.Empty;
         DateTime date;
-        string gender;
+        string gender = string.Empty;
 
-        List<Module> modules;
+        List<Module> modules = new();
 
         public long Id { get => id; set => id = value; }
         public string Nom { get => nom; set => nom = value; }

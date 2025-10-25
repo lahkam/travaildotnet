@@ -3,7 +3,7 @@
     public class Product
     {
         int id;
-        string desg;
+        string desg = string.Empty;
         double qte;
         int pu;
 

@@ -3,9 +3,9 @@
     public class Semestre
     {
         long id;
-        string name;
+        string name = string.Empty;
 
-        List<Module>? modules;
+        List<Module>? modules = new();
        
 
         public long Id { get => id; set => id = value; }

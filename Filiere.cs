@@ -3,9 +3,9 @@
     public class Filiere
     {
         long id;
-        string name;
-        string description;
-        List<Semestre> semestres;
+        string name = string.Empty;
+        string description = string.Empty;
+        List<Semestre> semestres = new();
 
         public long Id { get => id; set => id = value; }
         public string Name { get => name; set => name = value; }

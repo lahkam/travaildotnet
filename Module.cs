@@ -5,13 +5,13 @@ namespace isgasoir
     public class Module
     {
         long id;
-        string name;
+        string name = string.Empty;
         double coiff;
 
         [JsonIgnore]
-        Semestre sem;
+        Semestre? sem;
 
-        List<Studant>? studants;
+        List<Studant>? studants = new();
 
         public long Id { get => id; set => id = value; }
         public string Name { get => name; set => name = value; }

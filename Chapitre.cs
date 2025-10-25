@@ -5,12 +5,12 @@ namespace isgasoir
     public class Chapitre
     {
         long id;
-        string title;
-        string content;
+        string title = string.Empty;
+        string content = string.Empty;
         [JsonIgnore]
         Module? module;
         double duree;
-        List<Activity>? activities;
+        List<Activity>? activities = new();
         public double Duree { get => duree; set => duree = value; }
         public long Id { get => id; set => id = value; }
         public string Title { get => title; set => title = value; }
