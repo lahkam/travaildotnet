@@ -4,6 +4,8 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Disable native apphost generation to avoid file lock/permission issues during development -->
+    <UseAppHost>false</UseAppHost>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +19,11 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.12" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
+
+  <!-- Suppress warnings about lowercase migration type names in generated files -->
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);8981</NoWarn>
+  </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="EFRepo\" />

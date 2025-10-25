@@ -3,9 +3,9 @@ namespace isgasoir
     public class Activity
     {
         long id;
-        string title;
-        string instructions;
-        long chapitreId;
+        string title = string.Empty;
+        string instructions = string.Empty;
+        long chapitreId = 0;
 
         public long Id { get => id; set => id = value; }
         public string Title { get => title; set => title = value; }
