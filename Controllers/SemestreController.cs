@@ -13,9 +13,10 @@ namespace isgasoir.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly Microsoft.Extensions.Logging.ILogger<SemestreController> _logger;
 
-        public SemestreController(IUnitOfWork unitOfWork)
+        public SemestreController(IUnitOfWork unitOfWork, Microsoft.Extensions.Logging.ILogger<SemestreController> logger = null)
         {
             this._unitOfWork = unitOfWork;
+            this._logger = logger;
         }
 
         // GET: api/semestres
@@ -101,10 +102,48 @@ namespace isgasoir.Controllers
             var existing = _unitOfWork.semestreRepository.findById(id);
             if (existing == null) return NotFound();
 
-            // If there are dependent modules or other entities, ensure they are removed/handled by cascade
-            _unitOfWork.semestreRepository.remove(existing);
-            _unitOfWork.complete();
-            return NoContent();
+            // Remove dependent entities to avoid FK constraint violations
+            try
+            {
+                // Remove modules for this semestre
+                var modules = _unitOfWork.moduleRepository.Query
+                    .Where(m => m.Sem != null && m.Sem.Id == id)
+                    .ToList();
+
+                foreach (var mod in modules)
+                {
+                    var chapitres = _unitOfWork.chapitreRepository.Query
+                        .Where(c => c.Module != null && c.Module.Id == mod.Id)
+                        .ToList();
+
+                    foreach (var ch in chapitres)
+                    {
+                        var acts = _unitOfWork.activityRepository.Query
+                            .Where(a => a.ChapitreId == ch.Id)
+                            .ToList();
+
+                        foreach (var a in acts)
+                        {
+                            _unitOfWork.activityRepository.remove(a);
+                        }
+
+                        _unitOfWork.chapitreRepository.remove(ch);
+                    }
+
+                    _unitOfWork.moduleRepository.remove(mod);
+                }
+
+                // finally remove semestre
+                _unitOfWork.semestreRepository.remove(existing);
+                _unitOfWork.complete();
+                return NoContent();
+            }
+            catch (System.Exception ex)
+            {
+                // log if logger available
+                try { _logger?.LogError(ex, "Error removing semestre {Id}", id); } catch { }
+                return StatusCode(500, "Erreur lors de la suppression du semestre");
+            }
         }
 
         /* private bool semestreExists(long id)
