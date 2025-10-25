@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using isgasoir.Services.ServiceApi;
 using System.Linq;
 
 namespace isgasoir.Controllers
@@ -9,33 +8,17 @@ namespace isgasoir.Controllers
     public class ActivitiesController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
-        private readonly LLMApiImpl _llm;
 
-        public ActivitiesController(IUnitOfWork uow, LLMApiImpl llm)
+        public ActivitiesController(IUnitOfWork uow)
         {
             _uow = uow;
-            _llm = llm;
         }
 
-        [HttpPost("generate/{chapitreId}")]
-        public IActionResult Generate(long chapitreId)
+        [HttpGet]
+        public IActionResult GetAll()
         {
-            var chap = _uow.chapitreRepository.findById(chapitreId);
-            if (chap == null) return NotFound();
-
-            var generated = _llm.GenerateActivityAsync(chap.Title, chap.Content).GetAwaiter().GetResult();
-
-            var activity = new Activity
-            {
-                Title = $"Activité auto pour {chap.Title}",
-                Instructions = generated,
-                ChapitreId = chap.Id
-            };
-
-            _uow.activityRepository.add(activity);
-            _uow.complete();
-
-            return CreatedAtAction(nameof(GetById), new { id = activity.Id }, activity);
+            var list = _uow.activityRepository.findAll();
+            return Ok(list);
         }
 
         [HttpGet("{id}")]
@@ -51,6 +34,39 @@ namespace isgasoir.Controllers
         {
             var list = _uow.activityRepository.Query.Where(a => a.ChapitreId == chapitreId).ToList();
             return Ok(list);
+        }
+
+        [HttpPost]
+        public IActionResult Create([FromBody] Activity activity)
+        {
+            // Vérifier que le chapitre existe
+            var chap = _uow.chapitreRepository.findById(activity.ChapitreId);
+            if (chap == null) return BadRequest($"Chapitre {activity.ChapitreId} introuvable");
+            _uow.activityRepository.add(activity);
+            _uow.complete();
+            return CreatedAtAction(nameof(GetById), new { id = activity.Id }, activity);
+        }
+
+        [HttpPost("generate/{chapitreId}")]
+        public IActionResult Generate(long chapitreId)
+        {
+            var chap = _uow.chapitreRepository.findById(chapitreId);
+            if (chap == null) return NotFound();
+
+            // génération de secours (sans LLM)
+            var generated = $"Instructions générées automatiquement pour le chapitre '{chap.Title}' :\n" +
+                            (string.IsNullOrWhiteSpace(chap.Content) ? "(pas de contenu)" : (chap.Content.Length > 200 ? chap.Content.Substring(0, 200) + "..." : chap.Content));
+
+            var activity = new Activity
+            {
+                Title = $"Activité auto pour {chap.Title}",
+                Instructions = generated,
+                ChapitreId = chap.Id
+            };
+
+            _uow.activityRepository.add(activity);
+            _uow.complete();
+            return CreatedAtAction(nameof(GetById), new { id = activity.Id }, activity);
         }
     }
 }
