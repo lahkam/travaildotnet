@@ -1,159 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using isgasoir;
-using isgasoir.Services.ServiceApi;
+using System.Linq;
 
 namespace isgasoir.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class ChapitresController : ControllerBase
     {
-       
-        private readonly IUnitOfWork _unitOfWork;
-       private readonly LLMApi _llmApi;
+        private readonly IUnitOfWork _uow;
 
-        public ChapitresController(IUnitOfWork unitOfWork, LLMApi llm)
+        public ChapitresController(IUnitOfWork uow)
         {
-            _unitOfWork = unitOfWork;
-            _llmApi = llm;
-
+            _uow = uow;
         }
 
-
-        // GET: api/Chapitres
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Chapitre>>> Getchapitres()
+        public IActionResult GetAll()
         {
-            if (_unitOfWork.chapitreRepository == null)
-            {
-                return NotFound();
-            }
-            // Utilisation de la méthode findAll() qui retourne une List<Chapitre>
-            // Pour respecter la signature async, on peut utiliser Task.FromResult
-            return await Task.FromResult(_unitOfWork.chapitreRepository.findAll());
+            var list = _uow.chapitreRepository.findAll();
+            return Ok(list);
         }
 
-        // GET: api/Chapitres/5
-        // Remplacement de la méthode GetChapitre pour utiliser Task.FromResult afin de respecter la nature async
         [HttpGet("{id}")]
-        public async Task<ActionResult<Chapitre>> GetChapitre(long id)
+        public IActionResult Get(long id)
         {
-          if (_unitOfWork.chapitreRepository == null)
-          {
-              return NotFound();
-          }
-            var chapitre = _unitOfWork.chapitreRepository.findById(id);
-
-            if (chapitre == null)
-            {
-                return NotFound();
-            }
-
-            return await Task.FromResult(chapitre);
+            var item = _uow.chapitreRepository.findById(id);
+            if (item == null) return NotFound();
+            return Ok(item);
         }
 
-        // PUT: api/Chapitres/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public IActionResult Create([FromBody] Chapitre chapitre)
+        {
+            _uow.chapitreRepository.add(chapitre);
+            _uow.complete();
+            return CreatedAtAction(nameof(Get), new { id = chapitre.Id }, chapitre);
+        }
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutChapitre(long id, Chapitre chapitre)
+        public IActionResult Update(long id, [FromBody] Chapitre chapitre)
         {
-            if (id != chapitre.Id)
-            {
-                return BadRequest();
-            }
-
-            try
-            {
-                await Task.Run(() =>
-                {
-                    // Ici, vous pouvez ajouter la logique de mise à jour si nécessaire, par exemple :
-                     _unitOfWork.chapitreRepository.update(chapitre);
-                    _unitOfWork.complete();
-                });
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ChapitreExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            var existing = _uow.chapitreRepository.findById(id);
+            if (existing == null) return NotFound();
+            chapitre.Id = id;
+            _uow.chapitreRepository.update(chapitre);
+            _uow.complete();
             return NoContent();
         }
 
-        // POST: api/Chapitres
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("{idm}")]
-        public async Task<ActionResult<Chapitre>> PostChapitre(Chapitre chapitre, long idm)
-        {
-            if (_unitOfWork.chapitreRepository == null)
-            {
-                return Problem("Entity set 'ApplicationContext.chapitres'  is null.");
-            }
-            await Task.Run(() =>
-            {
-                Module? mod = _unitOfWork.moduleRepository.findById(idm);
-                if (mod == null)
-                {
-                    //throw new Exception("Module not found");
-                }
-                else
-                {
-                    chapitre.Module = mod;
-                    _unitOfWork.chapitreRepository.add(chapitre);
-                    _unitOfWork.complete();
-                }
-            });
-
-            return CreatedAtAction("GetChapitre", new { id = chapitre.Id }, chapitre);
-        }
-
-        // DELETE: api/Chapitres/5
-        // Remplacement de la méthode DeleteChapitre pour utiliser Task.Run afin d'utiliser l'opérateur await et corriger CS1998
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteChapitre(long id)
+        public IActionResult Delete(long id)
         {
-            if (_unitOfWork.chapitreRepository == null)
-            {
-                return NotFound();
-            }
-            var chapitre = await Task.Run(() => _unitOfWork.chapitreRepository.findById(id));
-            if (chapitre == null)
-            {
-                return NotFound();
-            }
-
-            await Task.Run(() => {
-                _unitOfWork.chapitreRepository.remove(chapitre);
-                _unitOfWork.complete();
-            });
-
+            var existing = _uow.chapitreRepository.findById(id);
+            if (existing == null) return NotFound();
+            _uow.chapitreRepository.remove(existing);
+            _uow.complete();
             return NoContent();
         }
 
-        private bool ChapitreExists(long id)
+        [HttpGet("{id}/activities")]
+        public IActionResult GetActivities(long id)
         {
-            return (_unitOfWork.chapitreRepository.Query?.Any(e => e.Id == id)).GetValueOrDefault();
+            var acts = _uow.activityRepository.Query.Where(a => a.ChapitreId == id).ToList();
+            return Ok(acts);
         }
-
-        [HttpGet("generate")]
-        public async Task<IActionResult> Generate(string prompt)
-        {
-            var result = await _llmApi.GenerateTextAsync(prompt);
-
-            return Ok(result);
-        }
-
     }
 }

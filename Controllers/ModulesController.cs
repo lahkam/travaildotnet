@@ -1,94 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using isgasoir;
+using System.Linq;
 
 namespace isgasoir.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class ModulesController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _uow;
 
-        public ModulesController(IUnitOfWork unitOfWork)
+        public ModulesController(IUnitOfWork uow)
         {
-            this._unitOfWork = unitOfWork;
+            _uow = uow;
         }
 
-        // GET: api/Modules
         [HttpGet]
-        public  List<Module> Getmodules()
+        public IActionResult GetAll()
         {
-          if (_unitOfWork.moduleRepository == null)
-          {
-                return null;// NotFound();
-          }
-            return  _unitOfWork.moduleRepository.findAll();
+            var list = _uow.moduleRepository.findAll();
+            return Ok(list);
         }
 
-        // GET: api/Modules/5
         [HttpGet("{id}")]
-        public  ActionResult<Module> GetModule(long id)
+        public IActionResult Get(long id)
         {
-          if (_unitOfWork.moduleRepository == null)
-          {
-              return NotFound();
-          }
-            var @module =  _unitOfWork.moduleRepository.findById(id);
-
-            if (@module == null)
-            {
-                return NotFound();
-            }
-
-            return @module;
+            var item = _uow.moduleRepository.findById(id);
+            if (item == null) return NotFound();
+            return Ok(item);
         }
 
-
-        [HttpGet("/search")]
-        public ActionResult<List<Module>> GetModuleByName(string name)
+        [HttpPost]
+        public IActionResult Create([FromBody] Module module)
         {
-            if (_unitOfWork.moduleRepository == null)
-            {
-                return NotFound();
-            }
-            var @listmodule = _unitOfWork.moduleRepository.findByCretiria(m => m.Name.ToLower().Contains(name.ToLower())).ToList();
-
-            if (@listmodule == null)
-            {
-                return NotFound();
-            }
-
-            return @listmodule;
+            _uow.moduleRepository.add(module);
+            _uow.complete();
+            return CreatedAtAction(nameof(Get), new { id = module.Id }, module);
         }
 
-
-        // POST: api/Modules
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("{idsem}")]
-        public  ActionResult<Module> PostModule(Module @module, long idsem)
+        [HttpPut("{id}")]
+        public IActionResult Update(long id, [FromBody] Module module)
         {
-          if (_unitOfWork.moduleRepository == null)
-          {
-              return Problem("Entity set 'ApplicationContext.modules'  is null.");
-          }
-
-            Semestre? sem = _unitOfWork.semestreRepository.findById(idsem);
-            @module.Sem = sem;
-            _unitOfWork.moduleRepository.add(@module);
-            _unitOfWork.complete();
-
-            return CreatedAtAction("GetModule", new { id = @module.Id }, @module);
+            var existing = _uow.moduleRepository.findById(id);
+            if (existing == null) return NotFound();
+            module.Id = id;
+            _uow.moduleRepository.update(module);
+            _uow.complete();
+            return NoContent();
         }
 
-       /* private bool ModuleExists(long id)
+        [HttpDelete("{id}")]
+        public IActionResult Delete(long id)
         {
-            return (_context.modules?.Any(e => e.Id == id)).GetValueOrDefault();
-        }*/
+            var existing = _uow.moduleRepository.findById(id);
+            if (existing == null) return NotFound();
+            _uow.moduleRepository.remove(existing);
+            _uow.complete();
+            return NoContent();
+        }
+
+        [HttpGet("semestre/{semId}")]
+        public IActionResult GetBySemestre(long semId)
+        {
+            var list = _uow.moduleRepository.findByCretiria(m => ((Module)m).Sem != null && ((Module)m).Sem.Id == semId).ToList();
+            return Ok(list);
+        }
     }
 }

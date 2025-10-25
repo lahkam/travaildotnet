@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using isgasoir.Services.ServiceApi;
+using System.Linq;
 
 namespace isgasoir.Controllers
 {
@@ -43,6 +44,13 @@ namespace isgasoir.Controllers
             var a = _uow.activityRepository.findById(id);
             if (a == null) return NotFound();
             return Ok(a);
+        }
+
+        [HttpGet("by-chapitre/{chapitreId}")]
+        public IActionResult ListByChapitre(long chapitreId)
+        {
+            var list = _uow.activityRepository.Query.Where(a => a.ChapitreId == chapitreId).ToList();
+            return Ok(list);
         }
     }
 }
