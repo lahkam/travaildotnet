@@ -59,6 +59,20 @@ app.UseStaticFiles(new Microsoft.AspNetCore.Builder.StaticFileOptions
     }
 });
 
+// Ensure JSON responses include charset=utf-8 so accents display correctly
+app.Use(async (context, next) =>
+{
+    await next();
+    var ct = context.Response.ContentType;
+    if (!string.IsNullOrEmpty(ct) && ct.StartsWith("application/json", System.StringComparison.OrdinalIgnoreCase))
+    {
+        if (!ct.Contains("charset=", System.StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.ContentType = ct + "; charset=utf-8";
+        }
+    }
+});
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
