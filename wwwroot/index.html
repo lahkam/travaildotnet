@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>isgasoir — Interface</title>
+  <title>isgasoir — Interface CRUD</title>
   <style>
     body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f5f7fb;color:#0f172a}
     header{background:#fff;padding:12px 16px;border-bottom:1px solid #e6eef8}
@@ -12,13 +12,16 @@
     main{flex:1;padding:16px;overflow:auto}
     button{display:block;margin:6px 0;padding:8px;border-radius:6px;border:1px solid #dbeafe;background:#fff;color:#1f6feb;cursor:pointer}
     .sect{background:#fff;padding:12px;border-radius:6px}
-    .item{padding:8px;border-bottom:1px solid #eef2f6}
+    .item{padding:8px;border-bottom:1px solid #eef2f6;display:flex;justify-content:space-between}
+    .meta{color:#6b7280;font-size:13px}
+    input,textarea,select{width:100%;padding:8px;margin-top:6px;border:1px solid #e6eef8;border-radius:6px}
+    .row{display:flex;gap:8px}
     pre{white-space:pre-wrap}
   </style>
 </head>
 <body>
   <header>
-    <strong>isgasoir</strong>
+    <strong>isgasoir — Interface CRUD</strong>
   </header>
   <div class="app">
     <nav>
@@ -27,8 +30,7 @@
       <button id="nav-modules">Modules</button>
       <button id="nav-chapitres">Chapitres</button>
       <button id="nav-activites">Activités</button>
-      <button id="nav-hierarchy">Structure</button>
-      <div style="margin-top:12px;color:#6b7280;font-size:13px">UI simplifiée pour debug</div>
+      <div style="margin-top:12px;color:#6b7280;font-size:13px">Utilisez les formulaires pour CRUD</div>
     </nav>
     <main>
       <div id="content" class="sect">Chargement...</div>
@@ -36,42 +38,72 @@
   </div>
 
   <script>
-    (function(){
-      function safeFetchJson(path){
-        return fetch(path, { headers: { 'Accept': 'application/json' } }).then(function(r){ if(!r.ok) throw new Error(r.status + ' ' + r.statusText); return r.json(); });
-      }
+  (function(){
+    function showError(e){ var c=document.getElementById('content'); if(c){ c.innerHTML = '<div style="color:#c00">Erreur: ' + (e && e.message? e.message : e) + '</div>'; } console.error(e); }
 
-      function renderList(title, items, formatter){
-        var c = document.getElementById('content'); c.innerHTML='';
-        var h = document.createElement('h2'); h.innerText = title; c.appendChild(h);
-        if(!items || items.length===0){ var p = document.createElement('div'); p.innerText='Aucun élément'; c.appendChild(p); return; }
-        items.forEach(function(it){ var d = document.createElement('div'); d.className='item'; d.innerText = formatter ? formatter(it) : JSON.stringify(it); c.appendChild(d); });
-      }
+    function safeFetch(path, opts){ opts = opts || {}; opts.headers = Object.assign({'Content-Type':'application/json; charset=utf-8'}, opts.headers||{}); return fetch(path, opts).then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(r.status + ' ' + r.statusText + '\n' + t); }); return r; }); }
 
-      function renderFilieres(){ safeFetchJson('/api/filiere').then(function(list){ renderList('Filières', list, function(f){ return f.name + ' — ' + (f.description||''); }); }).catch(showError); }
-      function renderSemestres(){ safeFetchJson('/api/semestre').then(function(list){ renderList('Semestres', list, function(s){ return s.name + ' — FiliereId:' + (s.filiereId||''); }); }).catch(showError); }
-      function renderModules(){ safeFetchJson('/api/modules').then(function(list){ renderList('Modules', list, function(m){ return m.name + ' — Coeff:' + (m.coiff||m.coeff||''); }); }).catch(showError); }
-      function renderChapitres(){ safeFetchJson('/api/chapitres').then(function(list){ renderList('Chapitres', list, function(ch){ return ch.title + ' — Durée:' + (ch.duree||''); }); }).catch(showError); }
-      function renderActivities(){ safeFetchJson('/api/activities').then(function(list){ renderList('Activités', list, function(a){ return a.title + ' — ChapitreId:' + (a.chapitreId||''); }); }).catch(showError); }
-      function renderHierarchy(){ safeFetchJson('/api/filiere').then(function(list){ var c = document.getElementById('content'); c.innerHTML=''; var h = document.createElement('h2'); h.innerText = 'Structure hiérarchique'; c.appendChild(h); list.forEach(function(f){ var d = document.createElement('div'); d.className='item'; var t = document.createElement('div'); t.innerText = f.name + ' — ' + (f.description||''); d.appendChild(t); var btn = document.createElement('button'); btn.innerText = 'Afficher détails'; btn.style.display='inline-block'; btn.onclick = function(){ safeFetchJson('/api/filiere/' + f.id).then(function(full){ var pre = document.createElement('pre'); pre.innerText = JSON.stringify(full, null, 2); d.appendChild(pre); }).catch(showError); }; d.appendChild(btn); c.appendChild(d); }); }).catch(showError); }
+    function safeJson(path){ return safeFetch(path).then(function(r){ return r.json(); }); }
 
-      function showError(e){ var c = document.getElementById('content'); c.innerHTML = ''; var d = document.createElement('div'); d.style.color = '#c00'; d.innerText = 'Erreur: ' + (e && e.message ? e.message : String(e)); c.appendChild(d); console.error(e); }
+    // FILIERES
+    function renderFilieres(){ var c=document.getElementById('content'); c.innerHTML='';
+      var h=document.createElement('h2'); h.innerText='Filières'; c.appendChild(h);
+      var name=document.createElement('input'); name.placeholder='Nom'; c.appendChild(name);
+      var desc=document.createElement('input'); desc.placeholder='Description'; c.appendChild(desc);
+      var btn=document.createElement('button'); btn.innerText='Créer la filière'; btn.onclick = function(){ var payload={ Name: name.value.trim(), Description: desc.value.trim() }; if(!payload.Name){ alert('Nom requis'); return; } safeFetch('/api/filiere',{method:'POST', body: JSON.stringify(payload)}).then(function(){ name.value=''; desc.value=''; loadList(); }).catch(showError); }; c.appendChild(btn);
+      function loadList(){ safeJson('/api/filiere').then(function(list){ var div=document.createElement('div'); list.forEach(function(f){ var it=document.createElement('div'); it.className='item'; var left=document.createElement('div'); left.innerText = f.name + ' — ' + (f.description||''); var actions=document.createElement('div'); var e=document.createElement('button'); e.innerText='Éditer'; e.onclick=function(){ var nn=prompt('Nom', f.name); if(nn===null) return; var dd=prompt('Description', f.description||''); if(dd===null) return; safeFetch('/api/filiere/' + f.id, { method:'PUT', body: JSON.stringify({ Name: nn, Description: dd }) }).then(loadList).catch(showError); }; var d=document.createElement('button'); d.innerText='Supprimer'; d.onclick=function(){ if(!confirm('Supprimer?')) return; safeFetch('/api/filiere/' + f.id, { method:'DELETE' }).then(loadList).catch(showError); }; var v=document.createElement('button'); v.innerText='Voir'; v.onclick=function(){ safeJson('/api/filiere/' + f.id).then(function(full){ alert(JSON.stringify(full, null, 2)); }).catch(showError); };
+        actions.appendChild(v); actions.appendChild(e); actions.appendChild(d); it.appendChild(left); it.appendChild(actions); div.appendChild(it); }); c.appendChild(div); }).catch(showError); }
+      loadList();
+    }
 
-      // attach events robustly
-      function wire(){
-        var el;
-        el = document.getElementById('nav-filieres'); if(el) el.addEventListener('click', renderFilieres);
-        el = document.getElementById('nav-semestres'); if(el) el.addEventListener('click', renderSemestres);
-        el = document.getElementById('nav-modules'); if(el) el.addEventListener('click', renderModules);
-        el = document.getElementById('nav-chapitres'); if(el) el.addEventListener('click', renderChapitres);
-        el = document.getElementById('nav-activites'); if(el) el.addEventListener('click', renderActivities);
-        el = document.getElementById('nav-hierarchy'); if(el) el.addEventListener('click', renderHierarchy);
-      }
+    // SEMESTRES
+    function renderSemestres(){ var c=document.getElementById('content'); c.innerHTML=''; var h=document.createElement('h2'); h.innerText='Semestres'; c.appendChild(h);
+      var name=document.createElement('input'); name.placeholder='Nom'; c.appendChild(name);
+      var fil=document.createElement('input'); fil.placeholder='FiliereId (optionnel)'; c.appendChild(fil);
+      var btn=document.createElement('button'); btn.innerText='Créer semestre'; btn.onclick=function(){ var payload={ Name: name.value.trim(), FiliereId: parseInt(fil.value) || null }; if(!payload.Name){ alert('Nom requis'); return; } safeFetch('/api/semestre',{ method:'POST', body: JSON.stringify(payload) }).then(function(){ name.value=''; fil.value=''; load(); }).catch(showError); }; c.appendChild(btn);
+      function load(){ safeJson('/api/semestre').then(function(list){ var div=document.createElement('div'); list.forEach(function(s){ var it=document.createElement('div'); it.className='item'; var left=document.createElement('div'); left.innerText = s.name + ' — FiliereId:' + (s.filiereId||''); var actions=document.createElement('div'); var e=document.createElement('button'); e.innerText='Éditer'; e.onclick=function(){ var nn=prompt('Nom', s.name); if(nn===null) return; safeFetch('/api/semestre/' + s.id, { method:'PUT', body: JSON.stringify({ Name: nn }) }).then(load).catch(showError); }; var d=document.createElement('button'); d.innerText='Supprimer'; d.onclick=function(){ if(!confirm('Supprimer?')) return; safeFetch('/api/semestre/' + s.id, { method:'DELETE' }).then(load).catch(showError); }; actions.appendChild(e); actions.appendChild(d); it.appendChild(left); it.appendChild(actions); div.appendChild(it); }); c.appendChild(div); }).catch(showError); }
+      load();
+    }
 
-      if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
-      // initial
-      renderFilieres();
-    })();
+    // MODULES
+    function renderModules(){ var c=document.getElementById('content'); c.innerHTML=''; var h=document.createElement('h2'); h.innerText='Modules'; c.appendChild(h);
+      var name=document.createElement('input'); name.placeholder='Nom'; c.appendChild(name);
+      var coeff=document.createElement('input'); coeff.placeholder='Coefficient'; c.appendChild(coeff);
+      var sem=document.createElement('input'); sem.placeholder='SemestreId'; c.appendChild(sem);
+      var btn=document.createElement('button'); btn.innerText='Créer module'; btn.onclick=function(){ var payload={ Name: name.value.trim(), Coiff: parseFloat(coeff.value)||0 }; if(sem.value) payload.Sem = { Id: parseInt(sem.value) }; if(!payload.Name){ alert('Nom requis'); return; } safeFetch('/api/modules',{ method:'POST', body: JSON.stringify(payload) }).then(function(){ name.value=''; coeff.value=''; sem.value=''; load(); }).catch(showError); }; c.appendChild(btn);
+      function load(){ safeJson('/api/modules').then(function(list){ var div=document.createElement('div'); list.forEach(function(m){ var it=document.createElement('div'); it.className='item'; var left=document.createElement('div'); left.innerText = m.name + ' — Coeff:' + (m.coiff||m.coef||''); var actions=document.createElement('div'); var e=document.createElement('button'); e.innerText='Éditer'; e.onclick=function(){ var nn=prompt('Nom', m.name); if(nn===null) return; var cc=prompt('Coeff', m.coiff||0); if(cc===null) return; safeFetch('/api/modules/' + m.id, { method:'PUT', body: JSON.stringify({ Name: nn, Coiff: parseFloat(cc) }) }).then(load).catch(showError); }; var d=document.createElement('button'); d.innerText='Supprimer'; d.onclick=function(){ if(!confirm('Supprimer?')) return; safeFetch('/api/modules/' + m.id, { method:'DELETE' }).then(load).catch(showError); }; actions.appendChild(e); actions.appendChild(d); it.appendChild(left); it.appendChild(actions); div.appendChild(it); }); c.appendChild(div); }).catch(showError); }
+      load();
+    }
+
+    // CHAPITRES
+    function renderChapitres(){ var c=document.getElementById('content'); c.innerHTML=''; var h=document.createElement('h2'); h.innerText='Chapitres'; c.appendChild(h);
+      var title=document.createElement('input'); title.placeholder='Titre'; c.appendChild(title);
+      var contentInput=document.createElement('textarea'); contentInput.placeholder='Contenu'; c.appendChild(contentInput);
+      var duree=document.createElement('input'); duree.placeholder='Durée'; c.appendChild(duree);
+      var mod=document.createElement('input'); mod.placeholder='ModuleId'; c.appendChild(mod);
+      var btn=document.createElement('button'); btn.innerText='Créer chapitre'; btn.onclick=function(){ var payload={ Title: title.value.trim(), Content: contentInput.value.trim(), Duree: parseFloat(duree.value)||0 }; if(mod.value) payload.Module = { Id: parseInt(mod.value) }; if(!payload.Title){ alert('Titre requis'); return; } safeFetch('/api/chapitres',{ method:'POST', body: JSON.stringify(payload) }).then(function(){ title.value=''; contentInput.value=''; duree.value=''; mod.value=''; load(); }).catch(showError); }; c.appendChild(btn);
+      function load(){ safeJson('/api/chapitres').then(function(list){ var div=document.createElement('div'); list.forEach(function(ch){ var it=document.createElement('div'); it.className='item'; var left=document.createElement('div'); left.innerText = ch.title + ' — Durée:' + (ch.duree||'') + ' — ModuleId:' + (ch.moduleId||''); var actions=document.createElement('div'); var gen=document.createElement('button'); gen.innerText='Générer activité'; gen.onclick=function(){ var p = prompt('Prompt pour l\'IA (laisser vide pour contenu automatique)', 'Génère une activité pour le chapitre: ' + ch.title); safeFetch('/api/activities/generate/' + ch.id, { method:'POST', body: JSON.stringify({ Prompt: p }) }).then(function(resp){ return resp.json(); }).then(function(act){ alert('Activité créée: ' + (act.title||act.id)); }).catch(showError); }; var e=document.createElement('button'); e.innerText='Éditer'; e.onclick=function(){ var tt=prompt('Titre', ch.title); if(tt===null) return; var cc=prompt('Contenu'); if(cc===null) return; var dd=prompt('Durée', ch.duree); if(dd===null) return; safeFetch('/api/chapitres/' + ch.id, { method:'PUT', body: JSON.stringify({ Title: tt, Content: cc, Duree: parseFloat(dd) }) }).then(load).catch(showError); }; var d=document.createElement('button'); d.innerText='Supprimer'; d.onclick=function(){ if(!confirm('Supprimer?')) return; safeFetch('/api/chapitres/' + ch.id, { method:'DELETE' }).then(load).catch(showError); }; actions.appendChild(gen); actions.appendChild(e); actions.appendChild(d); it.appendChild(left); it.appendChild(actions); div.appendChild(it); }); c.appendChild(div); }).catch(showError); }
+      load();
+    }
+
+    // ACTIVITES
+    function renderActivities(){ var c=document.getElementById('content'); c.innerHTML=''; var h=document.createElement('h2'); h.innerText='Activités'; c.appendChild(h);
+      var title=document.createElement('input'); title.placeholder='Titre'; c.appendChild(title);
+      var instr=document.createElement('textarea'); instr.placeholder='Instructions'; c.appendChild(instr);
+      var chapSel=document.createElement('select'); var opt=document.createElement('option'); opt.value=''; opt.innerText='Sélectionner un chapitre'; chapSel.appendChild(opt); c.appendChild(chapSel);
+      // load chapters for select
+      safeJson('/api/chapitres').then(function(list){ list.forEach(function(ch){ var op=document.createElement('option'); op.value = ch.id; op.innerText = ch.title + ' (' + ch.id + ')'; chapSel.appendChild(op); }); }).catch(function(){ /* ignore */ });
+      var btn=document.createElement('button'); btn.innerText='Créer activité'; btn.onclick=function(){ var payload={ Title: title.value.trim(), Instructions: instr.value.trim(), ChapitreId: parseInt(chapSel.value)||0 }; if(!payload.Title){ alert('Titre requis'); return; } if(!payload.ChapitreId){ alert('Chapitre requis'); return; } safeFetch('/api/activities',{ method:'POST', body: JSON.stringify(payload) }).then(function(){ title.value=''; instr.value=''; chapSel.value=''; load(); }).catch(showError); }; c.appendChild(btn);
+      function load(){ safeJson('/api/activities').then(function(list){ var div=document.createElement('div'); list.forEach(function(a){ var it=document.createElement('div'); it.className='item'; var left=document.createElement('div'); left.innerText = a.title + ' — ChapitreId:' + (a.chapitreId||''); var actions=document.createElement('div'); var e=document.createElement('button'); e.innerText='Éditer'; e.onclick=function(){ var tt=prompt('Titre', a.title); if(tt===null) return; var ii=prompt('Instructions', a.instructions||''); if(ii===null) return; safeFetch('/api/activities/' + a.id, { method:'PUT', body: JSON.stringify({ Title: tt, Instructions: ii }) }).then(load).catch(showError); }; var d=document.createElement('button'); d.innerText='Supprimer'; d.onclick=function(){ if(!confirm('Supprimer?')) return; safeFetch('/api/activities/' + a.id, { method:'DELETE' }).then(load).catch(showError); }; actions.appendChild(e); actions.appendChild(d); it.appendChild(left); it.appendChild(actions); div.appendChild(it); }); c.appendChild(div); }).catch(showError); }
+      load();
+    }
+
+    // navigation wiring
+    function wire(){ document.getElementById('nav-filieres').addEventListener('click', renderFilieres); document.getElementById('nav-semestres').addEventListener('click', renderSemestres); document.getElementById('nav-modules').addEventListener('click', renderModules); document.getElementById('nav-chapitres').addEventListener('click', renderChapitres); document.getElementById('nav-activites').addEventListener('click', renderActivities); }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', wire); else wire();
+    // default
+    renderFilieres();
+  })();
   </script>
 </body>
 </html>
