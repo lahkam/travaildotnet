@@ -233,14 +233,85 @@
       await loadStudents();
     }
 
-    // --- HIERARCHY VIEW ---
-    async function renderHierarchy(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Structure hiérarchique</h2><div id="hier-tree" class="tree"></div>`; content.appendChild(s);
-      const tree = document.getElementById('hier-tree'); tree.innerHTML='Chargement...';
-      const r = await safeFetch('/api/filiere'); const filieres = await r.json(); tree.innerHTML='';
-      for(const f of filieres){ const node = document.createElement('div'); node.className='node'; node.innerHTML = `<strong>${escapeHtml(f.name)}</strong> <div class="meta">${escapeHtml(f.description||'')}</div>`; const ul = document.createElement('ul'); node.appendChild(ul); tree.appendChild(node);
-          // load semestres for this filiere
-          try{ const rf = await safeFetch('/api/filiere/'+f.id); const full = await rf.json(); if(full.semestres){ full.semestres.forEach(smt=>{ const li = document.createElement('li'); li.innerHTML = `<div><strong>Semestre: ${escapeHtml(smt.name)}</strong></div>`; const mlist = document.createElement('ul'); li.appendChild(mlist); if(smt.modules){ smt.modules.forEach(m=>{ const mli = document.createElement('li'); mli.innerHTML = `<div>Module: <em>${escapeHtml(m.name)}</em></div>`; const clist = document.createElement('ul'); mli.appendChild(clist); if(m.chapitres){ m.chapitres.forEach(c=>{ const cli = document.createElement('li'); cli.innerHTML = `<div>Chapitre: ${escapeHtml(c.title)}</div>`; const alist = document.createElement('ul'); if(c.activities){ c.activities.forEach(a=>{ const ali = document.createElement('li'); ali.innerHTML = `Activité: ${escapeHtml(a.title)}`; alist.appendChild(ali); }); } cli.appendChild(alist); clist.appendChild(cli); }); } mlist.appendChild(mli); }); } ul.appendChild(li); }); }
-          }catch(e){ console.warn('failed to load full filiere', e); }
+    // --- HIERARCHY VIEW (lazy expand) ---
+    async function renderHierarchy(){
+      content.innerHTML='';
+      const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Structure hiérarchique</h2><div id="hier-tree" class="tree"></div>`; content.appendChild(s);
+      const tree = document.getElementById('hier-tree');
+      tree.innerHTML='Chargement...';
+      try{
+        const r = await safeFetch('/api/filiere');
+        const filieres = await r.json();
+        tree.innerHTML='';
+        filieres.forEach(f=>{
+          const node = document.createElement('div');
+          node.className='node';
+          node.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${escapeHtml(f.name)}</strong><div class="meta">${escapeHtml(f.description||'')}</div></div><div><button class="btn-muted" data-id="${f.id}">Afficher</button></div></div>`;
+          const childrenContainer = document.createElement('div');
+          childrenContainer.style.marginTop='6px';
+          node.appendChild(childrenContainer);
+          tree.appendChild(node);
+
+          const btn = node.querySelector('button');
+          btn.addEventListener('click', async () => {
+            if (childrenContainer.dataset.loaded === 'true'){
+              // toggle visibility
+              childrenContainer.style.display = childrenContainer.style.display === 'none' ? '' : 'none';
+              return;
+            }
+            btn.disabled = true; btn.textContent = 'Chargement...';
+            try{
+              const rf = await safeFetch('/api/filiere/'+f.id);
+              const full = await rf.json();
+              // build semestres -> modules -> chapitres -> activities
+              const ulS = document.createElement('ul');
+              if (full.semestres && full.semestres.length>0){
+                full.semestres.forEach(smt => {
+                  const liS = document.createElement('li');
+                  liS.innerHTML = `<div><strong>Semestre: ${escapeHtml(smt.name)}</strong></div>`;
+                  const ulM = document.createElement('ul');
+                  if (smt.modules && smt.modules.length>0){
+                    smt.modules.forEach(m => {
+                      const liM = document.createElement('li');
+                      liM.innerHTML = `<div>Module: <em>${escapeHtml(m.name)}</em></div>`;
+                      const ulC = document.createElement('ul');
+                      if (m.chapitres && m.chapitres.length>0){
+                        m.chapitres.forEach(c => {
+                          const liC = document.createElement('li');
+                          liC.innerHTML = `<div>Chapitre: ${escapeHtml(c.title)}</div>`;
+                          const ulA = document.createElement('ul');
+                          if (c.activities && c.activities.length>0){
+                            c.activities.forEach(a => {
+                              const liA = document.createElement('li');
+                              liA.innerHTML = `Activité: ${escapeHtml(a.title)}`;
+                              ulA.appendChild(liA);
+                            });
+                          }
+                          liC.appendChild(ulA);
+                          ulC.appendChild(liC);
+                        });
+                      }
+                      liM.appendChild(ulC);
+                      ulM.appendChild(liM);
+                    });
+                  }
+                  liS.appendChild(ulM);
+                  ulS.appendChild(liS);
+                });
+              } else {
+                ulS.innerHTML = '<li class="meta">(Aucun semestre)</li>';
+              }
+              childrenContainer.appendChild(ulS);
+              childrenContainer.dataset.loaded = 'true';
+            }catch(e){
+              childrenContainer.innerHTML = '<div class="meta">Erreur lors du chargement</div>';
+            } finally{
+              btn.disabled = false; btn.textContent = 'Afficher';
+            }
+          });
+        });
+      }catch(e){
+        tree.innerHTML = '<div class="meta">Impossible de charger la structure</div>';
       }
     }
 
