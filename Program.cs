@@ -41,22 +41,22 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Serve frontend static files from wwwroot
-// Ensure HTML responses include charset=utf-8 so accents display correctly
-app.Use(async (context, next) =>
+// Serve default files and ensure HTML static files are sent with charset=utf-8
+app.UseDefaultFiles();
+app.UseStaticFiles(new Microsoft.AspNetCore.Builder.StaticFileOptions
 {
-    await next();
-    var ct = context.Response.ContentType;
-    if (!string.IsNullOrEmpty(ct) && ct.StartsWith("text/html", StringComparison.OrdinalIgnoreCase))
+    OnPrepareResponse = ctx =>
     {
-        if (!ct.Contains("charset=", StringComparison.OrdinalIgnoreCase))
+        var ct = ctx.Context.Response.ContentType;
+        if (!string.IsNullOrEmpty(ct) && ct.StartsWith("text/html", System.StringComparison.OrdinalIgnoreCase))
         {
-            context.Response.ContentType = "text/html; charset=utf-8";
+            if (!ct.Contains("charset=", System.StringComparison.OrdinalIgnoreCase))
+            {
+                ctx.Context.Response.ContentType = "text/html; charset=utf-8";
+            }
         }
     }
 });
-
-app.UseDefaultFiles();
-app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 
