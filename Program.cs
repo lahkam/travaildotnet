@@ -42,6 +42,25 @@ using (var scope = app.Services.CreateScope())
 
 // Serve frontend static files from wwwroot
 // Serve default files and ensure HTML static files are sent with charset=utf-8
+// Request logging middleware for diagnostics
+app.Use(async (context, next) =>
+{
+    var loggerFactory = context.RequestServices.GetService(typeof(Microsoft.Extensions.Logging.ILoggerFactory)) as Microsoft.Extensions.Logging.ILoggerFactory;
+    var logger = loggerFactory?.CreateLogger("RequestLogger");
+    try
+    {
+        context.Request.EnableBuffering();
+        using var reader = new System.IO.StreamReader(context.Request.Body, System.Text.Encoding.UTF8, leaveOpen: true);
+        var body = await reader.ReadToEndAsync();
+        context.Request.Body.Position = 0;
+        logger?.LogInformation("Incoming request {Method} {Path} Body: {Body}", context.Request.Method, context.Request.Path, body);
+    }
+    catch (System.Exception ex)
+    {
+        logger?.LogError(ex, "Failed to read request body");
+    }
+    await next();
+});
 app.UseDefaultFiles();
 app.UseStaticFiles(new Microsoft.AspNetCore.Builder.StaticFileOptions
 {
