@@ -372,31 +372,40 @@
     function escapeHtml(s){ if(s==null) return ''; return String(s).replace(/[&<>\"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','\\' : '\\', '"':'&quot;' }[c]||c)); }
     function escapeJs(s){ return (s||'').replace(/'/g, "\\'").replace(/\n/g,'\\n'); }
 
-    // Wire navigation after DOM loaded to ensure elements exist
-    document.addEventListener('DOMContentLoaded', function(){
-      try {
-        const nav = document.getElementById('nav-filieres'); if(nav) nav.addEventListener('click', renderFilieres);
-        const n2 = document.getElementById('nav-semestres'); if(n2) n2.addEventListener('click', renderSemestres);
-        const n3 = document.getElementById('nav-modules'); if(n3) n3.addEventListener('click', renderModules);
-        const n4 = document.getElementById('nav-chapitres'); if(n4) n4.addEventListener('click', renderChapitres);
-        const n5 = document.getElementById('nav-activites'); if(n5) n5.addEventListener('click', renderActivities);
-        const n6 = document.getElementById('nav-etudiants'); if(n6) n6.addEventListener('click', renderStudents);
-        const n7 = document.getElementById('nav-hierarchy'); if(n7) n7.addEventListener('click', renderHierarchy);
-        const r = document.getElementById('refresh-all'); if(r) r.addEventListener('click', ()=>{
-          const cur = content.firstElementChild; if(!cur) return; const h = cur.querySelector('h2'); if(!h) return; const txt=h.textContent||'';
-          if(txt.includes('Fili')) renderFilieres();
-          if(txt.includes('Semest')) renderSemestres();
-          if(txt.includes('Module')) renderModules();
-          if(txt.includes('Chapitre')) renderChapitres();
-          if(txt.includes('Activit')) renderActivities();
-          if(txt.includes('Étudiant')) renderStudents();
-          if(txt.includes('Structure')) renderHierarchy();
-        });
+    // Wire navigation and initialize UI. Works even if DOMContentLoaded already fired.
+    (function initNavigation(){
+      function wire(){
+        try {
+          const nav = document.getElementById('nav-filieres'); if(nav) nav.addEventListener('click', renderFilieres);
+          const n2 = document.getElementById('nav-semestres'); if(n2) n2.addEventListener('click', renderSemestres);
+          const n3 = document.getElementById('nav-modules'); if(n3) n3.addEventListener('click', renderModules);
+          const n4 = document.getElementById('nav-chapitres'); if(n4) n4.addEventListener('click', renderChapitres);
+          const n5 = document.getElementById('nav-activites'); if(n5) n5.addEventListener('click', renderActivities);
+          const n6 = document.getElementById('nav-etudiants'); if(n6) n6.addEventListener('click', renderStudents);
+          const n7 = document.getElementById('nav-hierarchy'); if(n7) n7.addEventListener('click', renderHierarchy);
+          const r = document.getElementById('refresh-all'); if(r) r.addEventListener('click', ()=>{
+            const cur = content.firstElementChild; if(!cur) return; const h = cur.querySelector('h2'); if(!h) return; const txt=h.textContent||'';
+            if(txt.includes('Fili')) renderFilieres();
+            if(txt.includes('Semest')) renderSemestres();
+            if(txt.includes('Module')) renderModules();
+            if(txt.includes('Chapitre')) renderChapitres();
+            if(txt.includes('Activit')) renderActivities();
+            if(txt.includes('Étudiant')) renderStudents();
+            if(txt.includes('Structure')) renderHierarchy();
+          });
 
-        // initial view
-        renderFilieres();
-      } catch(err){ console.error('Navigation wiring failed', err); }
-    });
+          // initial view
+          renderFilieres();
+        } catch(err){ console.error('Navigation wiring failed', err); }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', wire);
+      } else {
+        // DOM already ready
+        wire();
+      }
+    })();
   </script>
 </body>
 </html>
