@@ -48,14 +48,39 @@ namespace isgasoir.Controllers
         }
 
         [HttpPost("generate/{chapitreId}")]
-        public IActionResult Generate(long chapitreId)
+        public IActionResult Generate(long chapitreId, [FromBody] dynamic body)
         {
             var chap = _uow.chapitreRepository.findById(chapitreId);
             if (chap == null) return NotFound();
 
-            // génération de secours (sans LLM)
-            var generated = $"Instructions générées automatiquement pour le chapitre '{chap.Title}' :\n" +
+            string prompt = string.Empty;
+            try { prompt = (string)body.Prompt; } catch { prompt = string.Empty; }
+
+            string generated;
+            if (!string.IsNullOrWhiteSpace(prompt))
+            {
+                try
+                {
+                    var llm = HttpContext.RequestServices.GetService(typeof(isgasoir.Services.ServiceApi.LLMApi)) as isgasoir.Services.ServiceApi.LLMApi;
+                    if (llm != null)
+                    {
+                        generated = llm.GenerateTextAsync(prompt).GetAwaiter().GetResult();
+                    }
+                    else
+                    {
+                        generated = "Prompt utilisé:\n" + prompt;
+                    }
+                }
+                catch
+                {
+                    generated = "Prompt utilisé:\n" + prompt;
+                }
+            }
+            else
+            {
+                generated = $"Instructions générées automatiquement pour le chapitre '{chap.Title}' :\n" +
                             (string.IsNullOrWhiteSpace(chap.Content) ? "(pas de contenu)" : (chap.Content.Length > 200 ? chap.Content.Substring(0, 200) + "..." : chap.Content));
+            }
 
             var activity = new Activity
             {
