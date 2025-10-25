@@ -27,7 +27,7 @@ namespace isgasoir.Controllers
                 return null;// NotFound();
             }
             return _unitOfWork.semestreRepository.Query.Include(s => s.Modules).ToList();
-           // return _unitOfWork.semestreRepository.findAll();
+           // return _unitOfWork.semestre_repository.findAll();
         }
 
         // GET: api/semestres/5
@@ -78,6 +78,19 @@ namespace isgasoir.Controllers
             _unitOfWork.complete();
 
             return CreatedAtAction("Getsemestre", new { id = @semestre.Id }, @semestre);
+        }
+
+        // DELETE: api/semestres/5
+        [HttpDelete("{id}")]
+        public IActionResult Delete(long id)
+        {
+            if (_unitOfWork.semestreRepository == null) return NotFound();
+            var existing = _unitOfWork.semestreRepository.findById(id);
+            if (existing == null) return NotFound();
+
+            _unitOfWork.semestreRepository.remove(existing);
+            _unitOfWork.complete();
+            return NoContent();
         }
 
         /* private bool semestreExists(long id)
