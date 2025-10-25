@@ -28,12 +28,13 @@ namespace isgasoir
 
         }
 
-        DbSet<Product> products { get; set; }
-        DbSet<Studant> studants { get; set; }
-        DbSet<Semestre> semestrees { get; set;}
-        DbSet<Module> modules { get; set; }
-        DbSet<Filiere> filieres { get; set; }
-        DbSet<Chapitre> chapitres { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Studant> Studants { get; set; }
+        public DbSet<Semestre> Semestrees { get; set; }
+        public DbSet<Module> Modules { get; set; }
+        public DbSet<Filiere> Filieres { get; set; }
+        public DbSet<Chapitre> Chapitres { get; set; }
+        public DbSet<Activity> Activities { get; set; }
 
     }
 }

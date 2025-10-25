@@ -11,6 +11,7 @@
         public IBaseRepository<Semestre, long> semestreRepository { get; private set; }
         public IBaseRepository<Filiere, long> filiereRepository { get; private set; }
         public IBaseRepository<Chapitre, long> chapitreRepository { get; private set; }
+        public IBaseRepository<Activity, long> activityRepository { get; private set; }
 
         public UnitOfWork(ApplicationContext context)
         {
@@ -22,6 +23,7 @@
             semestreRepository = new BaseRepository<Semestre, long>(context);
             filiereRepository = new BaseRepository<Filiere, long>(context);
             chapitreRepository = new BaseRepository<Chapitre, long>(context);
+            activityRepository = new BaseRepository<Activity, long>(context);
 
 
 

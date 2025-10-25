@@ -8,6 +8,7 @@
         IBaseRepository<Module, long> moduleRepository { get; }
         IBaseRepository<Filiere, long> filiereRepository { get; }
         IBaseRepository<Chapitre, long> chapitreRepository { get; }
+        IBaseRepository<Activity, long> activityRepository { get; }
         int complete();
     }
 }

@@ -25,7 +25,8 @@ namespace isgasoir
 
         public IEnumerable<T> findByCretiria(System.Linq.Expressions.Expression<Func<T, bool>> critiria)
         {
-           return  _entities.Where(critiria.Compile());
+           // Let EF translate the expression instead of compiling to avoid client evaluation
+           return _entities.Where(critiria).AsEnumerable();
 
         }
 
@@ -41,7 +42,8 @@ namespace isgasoir
 
         public T update(T entity)
         {
-            throw new NotImplementedException();
+            _entities.Update(entity);
+            return entity;
         }
 
        public  IQueryable<T> Query => _entities;
