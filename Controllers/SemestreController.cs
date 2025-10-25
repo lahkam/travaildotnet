@@ -105,14 +105,16 @@ namespace isgasoir.Controllers
             // Remove dependent entities to avoid FK constraint violations
             try
             {
-                // Remove modules for this semestre
+                // Remove modules for this semestre (include Sem to evaluate FK)
                 var modules = _unitOfWork.moduleRepository.Query
+                    .ToList()
                     .Where(m => m.Sem != null && m.Sem.Id == id)
                     .ToList();
 
                 foreach (var mod in modules)
                 {
                     var chapitres = _unitOfWork.chapitreRepository.Query
+                        .ToList()
                         .Where(c => c.Module != null && c.Module.Id == mod.Id)
                         .ToList();
 
