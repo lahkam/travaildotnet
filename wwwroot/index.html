@@ -16,7 +16,7 @@
 <body>
   <div class="container">
     <h1>isgasoir - Frontend minimal</h1>
-    <p>Utilisez les sections ci-dessous pour gérer les entités (CRUD) et générer des activités.</p>
+    <p>Interface minimale pour CRUD. Sections rapides : Chapitres, Modules, Etudiants, Semestres, Filières, Activités.</p>
 
     <section class="card" id="chapitres">
       <h2>Chapitres</h2>
@@ -29,6 +29,48 @@
       <div id="chap-list"></div>
     </section>
 
+    <section class="card" id="modules">
+      <h2>Modules</h2>
+      <div>
+        <input id="mod-name" placeholder="Nom" />
+        <input id="mod-coiff" placeholder="Coiff (ex: 1.0)" />
+        <input id="mod-sem" placeholder="SemestreId (optionnel)" />
+        <button id="mod-create">Créer</button>
+      </div>
+      <div id="mod-list"></div>
+    </section>
+
+    <section class="card" id="students">
+      <h2>Etudiants</h2>
+      <div>
+        <input id="st-nom" placeholder="Nom" />
+        <input id="st-prenom" placeholder="Prenom" />
+        <input id="st-date" placeholder="Date (YYYY-MM-DD)" />
+        <input id="st-gender" placeholder="Gender" />
+        <button id="st-create">Créer</button>
+      </div>
+      <div id="st-list"></div>
+    </section>
+
+    <section class="card" id="semestres">
+      <h2>Semestres</h2>
+      <div>
+        <input id="sem-name" placeholder="Nom" />
+        <button id="sem-create">Créer</button>
+      </div>
+      <div id="sem-list"></div>
+    </section>
+
+    <section class="card" id="filieres">
+      <h2>Filieres</h2>
+      <div>
+        <input id="fil-name" placeholder="Nom" />
+        <textarea id="fil-desc" placeholder="Description"></textarea>
+        <button id="fil-create">Créer</button>
+      </div>
+      <div id="fil-list"></div>
+    </section>
+
     <section class="card" id="activities">
       <h2>Activities</h2>
       <div id="activities-list"></div>
@@ -39,54 +81,70 @@
   <script>
     const apiBase = '';
 
+    // Generic safe fetch helper
+    async function safeFetch(url, opts){
+      try{
+        const r = await fetch(apiBase + url, opts);
+        if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+        return r;
+      }catch(e){ console.warn('fetch', url, e); return null; }
+    }
+
+    // CHAPITRES
     async function loadChapitres(){
-      const res = await fetch(apiBase + '/api/chapitres');
-      const list = await res.json();
-      const container = document.getElementById('chap-list');
-      container.innerHTML='';
+      const r = await safeFetch('/api/chapitres'); if(!r) return;
+      const list = await r.json();
+      const container = document.getElementById('chap-list'); container.innerHTML='';
       list.forEach(c=>{
         const el = document.createElement('div'); el.className='card';
         el.innerHTML = `<strong>${c.title}</strong> <div>${c.content}</div> <div>Duree: ${c.duree}</div>
           <div><button onclick="gen(${c.id})">Generer Activite</button>
-          <button onclick="delChap(${c.id})">Supprimer</button></div>
-        `;
+          <button onclick="delChap(${c.id})">Supprimer</button></div>`;
         container.appendChild(el);
       });
     }
-
     async function createChap(){
       const title = document.getElementById('chap-title').value;
       const content = document.getElementById('chap-content').value;
       const duree = parseFloat(document.getElementById('chap-duree').value || '0');
-      await fetch(apiBase + '/api/chapitres', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ Title: title, Content: content, Duree: duree }) });
+      await safeFetch('/api/chapitres', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ Title: title, Content: content, Duree: duree }) });
       await loadChapitres();
     }
+    async function delChap(id){ await safeFetch('/api/chapitres/' + id, { method:'DELETE' }); await loadChapitres(); }
+    async function gen(id){ await safeFetch('/api/activities/generate/' + id, { method:'POST' }); await loadActivities(id); }
 
-    async function delChap(id){
-      await fetch(apiBase + '/api/chapitres/' + id, { method:'DELETE' });
-      await loadChapitres();
-    }
+    // MODULES
+    async function loadModules(){ const r = await safeFetch('/api/modules'); if(!r) return; const list = await r.json(); const container = document.getElementById('mod-list'); container.innerHTML=''; list.forEach(m=>{ const el=document.createElement('div'); el.className='card'; el.innerHTML = `<strong>${m.name}</strong><div>Coiff: ${m.coiff}</div><div>Id: ${m.id}</div><div><button onclick="delMod(${m.id})">Supprimer</button></div>`; container.appendChild(el); }); }
+    async function createMod(){ const name=document.getElementById('mod-name').value; const coiff=parseFloat(document.getElementById('mod-coiff').value||'0'); const semId = parseInt(document.getElementById('mod-sem').value||'0'); const payload = { Name: name, Coiff: coiff }; if(semId>0) payload.Sem = { Id: semId }; await safeFetch('/api/modules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); await loadModules(); }
+    async function delMod(id){ await safeFetch('/api/modules/' + id, { method:'DELETE' }); await loadModules(); }
 
-    async function gen(id){
-      await fetch(apiBase + '/api/activities/generate/' + id, { method:'POST' });
-      await loadActivities(id);
-    }
+    // STUDENTS
+    async function loadStudents(){ const r = await safeFetch('/api/studentapi'); if(!r) return; const list = await r.json(); const container = document.getElementById('st-list'); container.innerHTML=''; list.forEach(s=>{ const el=document.createElement('div'); el.className='card'; el.innerHTML = `<strong>${s.nom} ${s.prenom}</strong><div>Date: ${s.date}</div><div>Gender: ${s.gender}</div><div><button onclick="delStudent(${s.id})">Supprimer</button></div>`; container.appendChild(el); }); }
+    async function createStudent(){ const nom=document.getElementById('st-nom').value; const prenom=document.getElementById('st-prenom').value; const date=document.getElementById('st-date').value; const gender=document.getElementById('st-gender').value; await safeFetch('/api/studentapi',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ Nom: nom, Prenom: prenom, Date: date, Gender: gender })}); await loadStudents(); }
+    async function delStudent(id){ await safeFetch('/api/studentapi/' + id, { method:'DELETE' }); await loadStudents(); }
 
-    async function loadActivities(chapId){
-      const res = await fetch(apiBase + '/api/activities/by-chapitre/' + chapId);
-      const list = await res.json();
-      const container = document.getElementById('activities-list');
-      container.innerHTML='';
-      list.forEach(a=>{
-        const el = document.createElement('div'); el.className='card';
-        el.innerHTML = `<strong>${a.title}</strong><pre>${a.instructions}</pre>`;
-        container.appendChild(el);
-      });
-    }
+    // SEMESTRES
+    async function loadSemestres(){ const r = await safeFetch('/api/semestre'); if(!r) return; const list = await r.json(); const container = document.getElementById('sem-list'); container.innerHTML=''; list.forEach(s=>{ const el=document.createElement('div'); el.className='card'; el.innerHTML = `<strong>${s.name}</strong><div>Id: ${s.id}</div><div><button onclick="delSem(${s.id})">Supprimer</button></div>`; container.appendChild(el); }); }
+    async function createSem(){ const name = document.getElementById('sem-name').value; await safeFetch('/api/semestre',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ Name: name })}); await loadSemestres(); }
+    async function delSem(id){ await safeFetch('/api/semestre/' + id, { method:'DELETE' }); await loadSemestres(); }
 
+    // FILIERES
+    async function loadFilieres(){ const r = await safeFetch('/api/filiere'); if(!r) return; const list = await r.json(); const container = document.getElementById('fil-list'); container.innerHTML=''; list.forEach(f=>{ const el=document.createElement('div'); el.className='card'; el.innerHTML = `<strong>${f.name}</strong><div>${f.description}</div><div><button onclick="delFil(${f.id})">Supprimer</button></div>`; container.appendChild(el); }); }
+    async function createFil(){ const name=document.getElementById('fil-name').value; const desc=document.getElementById('fil-desc').value; await safeFetch('/api/filiere',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ Name: name, Description: desc })}); await loadFilieres(); }
+    async function delFil(id){ await safeFetch('/api/filiere/' + id, { method:'DELETE' }); await loadFilieres(); }
+
+    // ACTIVITIES
+    async function loadActivities(chapId){ const r = await safeFetch('/api/activities/by-chapitre/' + chapId); if(!r) return; const list = await r.json(); const container = document.getElementById('activities-list'); container.innerHTML=''; list.forEach(a=>{ const el = document.createElement('div'); el.className='card'; el.innerHTML = `<strong>${a.title}</strong><pre>${a.instructions}</pre>`; container.appendChild(el); }); }
+
+    // Wire buttons
     document.getElementById('chap-create').addEventListener('click', createChap);
+    document.getElementById('mod-create').addEventListener('click', createMod);
+    document.getElementById('st-create').addEventListener('click', createStudent);
+    document.getElementById('sem-create').addEventListener('click', createSem);
+    document.getElementById('fil-create').addEventListener('click', createFil);
 
-    loadChapitres();
+    // Initial load
+    loadChapitres(); loadModules(); loadStudents(); loadSemestres(); loadFilieres();
   </script>
 </body>
 </html>
