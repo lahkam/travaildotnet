@@ -172,10 +172,48 @@
 
     // --- ACTIVITIES ---
     async function renderActivities(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Activités</h2>
+        <div>
+          <label>Titre</label><input id="act-title" />
+          <label>Instructions</label><textarea id="act-instr"></textarea>
+          <label>Chapitre</label>
+          <select id="act-chap"><option value="">(sélectionner un chapitre)</option></select>
+          <div style="display:flex;gap:8px;margin-top:8px"><button id="act-create">Créer</button><button id="act-refresh" class="btn-muted">Rafraîchir</button></div>
+        </div>
         <div class="list" id="act-list"></div>`; content.appendChild(s);
-        async function loadActs(){ const r = await safeFetch('/api/activities'); const list = await r.json(); const c=document.getElementById('act-list'); c.innerHTML=''; list.forEach(a=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(a.title)}</strong><div class="meta">ChapitreId: ${a.chapitreId ?? ''}</div><pre style="margin:6px 0">${escapeHtml(a.instructions)}</pre></div><div><button class="btn-muted" onclick="editAct(${a.id},'${escapeJs(a.title)}')">Éditer</button><button class="danger" onclick="delAct(${a.id})">Supprimer</button></div>`; c.appendChild(node); }); }
+
+        // load chapters into select
+        async function loadChaptersIntoSelect(){
+            const sel = document.getElementById('act-chap');
+            sel.innerHTML = '<option value="">(sélectionner un chapitre)</option>';
+            try{
+                const r = await safeFetch('/api/chapitres');
+                const list = await r.json();
+                list.forEach(ch => {
+                    const opt = document.createElement('option');
+                    opt.value = ch.id;
+                    opt.textContent = `${ch.title} (${ch.id})`;
+                    sel.appendChild(opt);
+                });
+            }catch(e){ console.warn('Impossible de charger les chapitres', e); }
+        }
+
+        document.getElementById('act-create').addEventListener('click', async ()=>{
+            const title = document.getElementById('act-title').value.trim();
+            const instr = document.getElementById('act-instr').value.trim();
+            const chapId = parseInt(document.getElementById('act-chap').value)||0;
+            if(!title){ alert('Titre requis'); return; }
+            if(!chapId){ alert('Veuillez sélectionner un chapitre'); return; }
+            try{
+                await safeFetch('/api/activities', { method:'POST', body: JSON.stringify({ Title: title, Instructions: instr, ChapitreId: chapId }) });
+                document.getElementById('act-title').value=''; document.getElementById('act-instr').value=''; document.getElementById('act-chap').value='';
+                await loadActs();
+            }catch(e){ console.error(e); }
+        });
+        document.getElementById('act-refresh').addEventListener('click', loadActs);
+        async function loadActs(){ const r = await safeFetch('/api/activities'); const list = await r.json(); const c=document.getElementById('act-list'); c.innerHTML=''; list.forEach(a=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(a.title)}</strong><div class="meta">ChapitreId: ${a.chapitreId ?? a.chapitreId ?? ''}</div><pre style="margin:6px 0">${escapeHtml(a.instructions)}</pre></div><div><button class="btn-muted" onclick="editAct(${a.id},'${escapeJs(a.title)}')">Éditer</button><button class="danger" onclick="delAct(${a.id})">Supprimer</button></div>`; c.appendChild(node); }); }
         window.editAct = async (id,title)=>{ const t = prompt('Titre', title); if(t===null) return; const inst = prompt('Instructions'); if(inst===null) return; await safeFetch('/api/activities/'+id,{method:'PUT',body:JSON.stringify({ Title:t, Instructions: inst })}); await loadActs(); }
         window.delAct = async (id)=>{ if(!confirm('Supprimer ?')) return; await safeFetch('/api/activities/'+id,{method:'DELETE'}); await loadActs(); }
+        await loadChaptersIntoSelect();
         await loadActs();
     }
 
