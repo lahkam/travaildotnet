@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>isgasoir - Frontend minimal</title>
+  <style>
+    body{font-family:Segoe UI,Arial;margin:16px}
+    .container{max-width:900px;margin:auto}
+    .card{border:1px solid #ddd;padding:12px;margin:8px 0;border-radius:6px}
+    input,select,textarea{width:100%;padding:8px;margin:6px 0}
+    button{padding:8px 12px;margin:4px}
+    .row{display:flex;gap:12px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>isgasoir - Frontend minimal</h1>
+    <p>Utilisez les sections ci-dessous pour gérer les entités (CRUD) et générer des activités.</p>
+
+    <section class="card" id="chapitres">
+      <h2>Chapitres</h2>
+      <div>
+        <input id="chap-title" placeholder="Titre" />
+        <textarea id="chap-content" placeholder="Contenu"></textarea>
+        <input id="chap-duree" placeholder="Duree" />
+        <button id="chap-create">Créer</button>
+      </div>
+      <div id="chap-list"></div>
+    </section>
+
+    <section class="card" id="activities">
+      <h2>Activities</h2>
+      <div id="activities-list"></div>
+    </section>
+
+  </div>
+
+  <script>
+    const apiBase = '';
+
+    async function loadChapitres(){
+      const res = await fetch(apiBase + '/api/chapitres');
+      const list = await res.json();
+      const container = document.getElementById('chap-list');
+      container.innerHTML='';
+      list.forEach(c=>{
+        const el = document.createElement('div'); el.className='card';
+        el.innerHTML = `<strong>${c.title}</strong> <div>${c.content}</div> <div>Duree: ${c.duree}</div>
+          <div><button onclick="gen(${c.id})">Generer Activite</button>
+          <button onclick="delChap(${c.id})">Supprimer</button></div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    async function createChap(){
+      const title = document.getElementById('chap-title').value;
+      const content = document.getElementById('chap-content').value;
+      const duree = parseFloat(document.getElementById('chap-duree').value || '0');
+      await fetch(apiBase + '/api/chapitres', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ Title: title, Content: content, Duree: duree }) });
+      await loadChapitres();
+    }
+
+    async function delChap(id){
+      await fetch(apiBase + '/api/chapitres/' + id, { method:'DELETE' });
+      await loadChapitres();
+    }
+
+    async function gen(id){
+      await fetch(apiBase + '/api/activities/generate/' + id, { method:'POST' });
+      await loadActivities(id);
+    }
+
+    async function loadActivities(chapId){
+      const res = await fetch(apiBase + '/api/activities/by-chapitre/' + chapId);
+      const list = await res.json();
+      const container = document.getElementById('activities-list');
+      container.innerHTML='';
+      list.forEach(a=>{
+        const el = document.createElement('div'); el.className='card';
+        el.innerHTML = `<strong>${a.title}</strong><pre>${a.instructions}</pre>`;
+        container.appendChild(el);
+      });
+    }
+
+    document.getElementById('chap-create').addEventListener('click', createChap);
+
+    loadChapitres();
+  </script>
+</body>
+</html>

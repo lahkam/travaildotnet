@@ -40,6 +40,10 @@ using (var scope = app.Services.CreateScope())
     ctx.Database.EnsureCreated();
 }
 
+// Serve frontend static files from wwwroot
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
