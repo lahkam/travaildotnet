@@ -84,10 +84,24 @@ namespace isgasoir.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(long id)
         {
+            return RemoveSemestre(id);
+        }
+
+        // Also accept plural route to avoid 405 when callers use /api/semestres/{id}
+        [HttpDelete]
+        [Route("/api/semestres/{id}")]
+        public IActionResult DeletePlural(long id)
+        {
+            return RemoveSemestre(id);
+        }
+
+        private IActionResult RemoveSemestre(long id)
+        {
             if (_unitOfWork.semestreRepository == null) return NotFound();
             var existing = _unitOfWork.semestreRepository.findById(id);
             if (existing == null) return NotFound();
 
+            // If there are dependent modules or other entities, ensure they are removed/handled by cascade
             _unitOfWork.semestreRepository.remove(existing);
             _unitOfWork.complete();
             return NoContent();
