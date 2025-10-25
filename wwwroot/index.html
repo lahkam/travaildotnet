@@ -1,10 +1,10 @@
-<!doctype html>
+ï»¿<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>isgasoir — Interface</title>
+  <title>isgasoir â€” Interface</title>
   <style>
     :root{--bg:#f5f7fb;--panel:#ffffff;--accent:#1f6feb;--muted:#6b7280;--danger:#e11d48}
     *{box-sizing:border-box}
@@ -38,10 +38,10 @@
   <header>
     <div>
       <h1>isgasoir</h1>
-      <div class="hint">Interface de gestion — Français (UTF?8)</div>
+      <div class="hint">Interface de gestion â€” FranÃ§ais (UTF?8)</div>
     </div>
     <div>
-      <button id="refresh-all" class="btn-muted">Rafraîchir</button>
+      <button id="refresh-all" class="btn-muted">RafraÃ®chir</button>
     </div>
   </header>
 
@@ -50,35 +50,35 @@
       <section class="sect">
         <h3>Navigation</h3>
         <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
-          <button id="nav-filieres" class="btn-muted">Filières</button>
+          <button id="nav-filieres" class="btn-muted">FiliÃ¨res</button>
           <button id="nav-semestres" class="btn-muted">Semestres</button>
           <button id="nav-modules" class="btn-muted">Modules</button>
           <button id="nav-chapitres" class="btn-muted">Chapitres</button>
-          <button id="nav-activites" class="btn-muted">Activités</button>
-          <button id="nav-etudiants" class="btn-muted">Étudiants</button>
+          <button id="nav-activites" class="btn-muted">ActivitÃ©s</button>
+          <button id="nav-etudiants" class="btn-muted">Ã‰tudiants</button>
           <button id="nav-hierarchy" class="btn-muted">Structure</button>
         </div>
       </section>
 
       <section class="sect">
-        <h4>Créer rapidement</h4>
-        <label>Filière</label>
-        <input id="quick-fil-name" placeholder="Nom de la filière" />
+        <h4>CrÃ©er rapidement</h4>
+        <label>FiliÃ¨re</label>
+        <input id="quick-fil-name" placeholder="Nom de la filiÃ¨re" />
         <label>Description</label>
         <input id="quick-fil-desc" placeholder="Description" />
-        <div style="display:flex;gap:8px;margin-top:8px"><button id="quick-create-fil">Créer</button></div>
+        <div style="display:flex;gap:8px;margin-top:8px"><button id="quick-create-fil">CrÃ©er</button></div>
       </section>
 
       <section class="sect">
         <h4>Raccourcis</h4>
-        <div class="hint">Utilisez les sections pour créer/éditer et consulter les entités. La structure permet d'explorer Filières ? Semestres ? Modules ? Chapitres ? Activités.</div>
+        <div class="hint">Utilisez les sections pour crÃ©er/Ã©diter et consulter les entitÃ©s. La structure permet d'explorer FiliÃ¨res ? Semestres ? Modules ? Chapitres ? ActivitÃ©s.</div>
       </section>
     </nav>
 
     <main>
       <!-- Container where sections will be rendered -->
       <div id="content"></div>
-      <footer>isgasoir — interface de test</footer>
+      <footer>isgasoir â€” interface de test</footer>
     </main>
   </div>
 
@@ -88,15 +88,15 @@
 
     function el(html){ const d = document.createElement('div'); d.innerHTML = html; return d.firstElementChild; }
 
-    async function safeFetch(path, opts){ opts = opts || {}; opts.headers = Object.assign({'Content-Type':'application/json; charset=utf-8'}, opts.headers||{}); try{ const r = await fetch(apiBase + path, opts); if(!r.ok){ const txt = await r.text(); throw new Error(r.status + ' ' + r.statusText + '\n' + txt); } return r; } catch(e){ alert('Erreur réseau: ' + e.message); throw e; } }
+    async function safeFetch(path, opts){ opts = opts || {}; opts.headers = Object.assign({'Content-Type':'application/json; charset=utf-8'}, opts.headers||{}); try{ const r = await fetch(apiBase + path, opts); if(!r.ok){ const txt = await r.text(); throw new Error(r.status + ' ' + r.statusText + '\n' + txt); } return r; } catch(e){ alert('Erreur rÃ©seau: ' + e.message); throw e; } }
 
     // --- FILIERES ---
     async function renderFilieres(){ content.innerHTML='';
-      const s = document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Filières</h2>
+      const s = document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>FiliÃ¨res</h2>
         <div>
           <label>Nom</label><input id="fil-name" />
           <label>Description</label><input id="fil-desc" />
-          <div style="display:flex;gap:8px;margin-top:8px"><button id="fil-create">Créer</button><button id="fil-refresh" class="btn-muted">Rafraîchir</button></div>
+          <div style="display:flex;gap:8px;margin-top:8px"><button id="fil-create">CrÃ©er</button><button id="fil-refresh" class="btn-muted">RafraÃ®chir</button></div>
         </div>
         <div class="list" id="fil-list"></div>`;
       content.appendChild(s);
@@ -110,7 +110,7 @@
       document.getElementById('quick-create-fil').addEventListener('click', async ()=>{ const n=document.getElementById('quick-fil-name').value; const d=document.getElementById('quick-fil-desc').value; if(!n){ alert('Nom requis'); return;} await safeFetch('/api/filiere',{method:'POST',body:JSON.stringify({Name:n,Description:d})}); document.getElementById('quick-fil-name').value=''; document.getElementById('quick-fil-desc').value=''; loadFilieres(); });
       async function loadFilieres(){ const r = await safeFetch('/api/filiere'); const list = await r.json(); const container = document.getElementById('fil-list'); container.innerHTML=''; list.forEach(f=>{ const node = document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(f.name)}</strong><div class="meta">${escapeHtml(f.description||'')}</div></div>
             <div class="actions">
-              <button class="btn-muted" data-id="${f.id}" onclick="editF(${f.id})">Éditer</button>
+              <button class="btn-muted" data-id="${f.id}" onclick="editF(${f.id})">Ã‰diter</button>
               <button class="btn-muted" data-id="${f.id}" onclick="viewF(${f.id})">Voir</button>
               <button class="danger" data-id="${f.id}" onclick="delF(${f.id})">Supprimer</button>
             </div>`; container.appendChild(node); });
@@ -127,12 +127,12 @@
     async function renderSemestres(){ content.innerHTML=''; const s = document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Semestres</h2>
         <label>Nom</label><input id="sem-name" />
         <label>FiliereId (optionnel)</label><input id="sem-fil" />
-        <div style="display:flex;gap:8px;margin-top:8px"><button id="sem-create">Créer</button><button id="sem-refresh" class="btn-muted">Rafraîchir</button></div>
+        <div style="display:flex;gap:8px;margin-top:8px"><button id="sem-create">CrÃ©er</button><button id="sem-refresh" class="btn-muted">RafraÃ®chir</button></div>
         <div class="list" id="sem-list"></div>`; content.appendChild(s);
       document.getElementById('sem-create').addEventListener('click', async ()=>{ const name=document.getElementById('sem-name').value; const fid = parseInt(document.getElementById('sem-fil').value)||null; if(!name){ alert('Nom requis'); return;} await safeFetch('/api/semestre',{method:'POST',body:JSON.stringify({ Name:name, FiliereId: fid })}); await loadSemestres(); document.getElementById('sem-name').value=''; document.getElementById('sem-fil').value=''; });
       document.getElementById('sem-refresh').addEventListener('click', loadSemestres);
       async function loadSemestres(){ const r = await safeFetch('/api/semestre'); const list = await r.json(); const container = document.getElementById('sem-list'); container.innerHTML=''; list.forEach(smt=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(smt.name)}</strong><div class="meta">FiliereId: ${smt.filiereId ?? ''}</div></div>
-              <div><button class="btn-muted" onclick="editSem(${smt.id},'${escapeJs(smt.name)}')">Éditer</button><button class="danger" onclick="delSem(${smt.id})">Supprimer</button></div>`; container.appendChild(node); }); }
+              <div><button class="btn-muted" onclick="editSem(${smt.id},'${escapeJs(smt.name)}')">Ã‰diter</button><button class="danger" onclick="delSem(${smt.id})">Supprimer</button></div>`; container.appendChild(node); }); }
       window.editSem = async (id,name)=>{ const n = prompt('Nom', name); if(n===null) return; await safeFetch('/api/semestre/'+id,{method:'PUT',body:JSON.stringify({ Name:n })}); await loadSemestres(); }
       window.delSem = async (id)=>{ if(!confirm('Supprimer ?')) return; await safeFetch('/api/semestre/'+id,{method:'DELETE'}); await loadSemestres(); }
       await loadSemestres();
@@ -143,11 +143,11 @@
       <label>Nom</label><input id="mod-name" />
       <label>Coefficient</label><input id="mod-coeff" />
       <label>SemestreId</label><input id="mod-sem" />
-      <div style="display:flex;gap:8px;margin-top:8px"><button id="mod-create">Créer</button><button id="mod-refresh" class="btn-muted">Rafraîchir</button></div>
+      <div style="display:flex;gap:8px;margin-top:8px"><button id="mod-create">CrÃ©er</button><button id="mod-refresh" class="btn-muted">RafraÃ®chir</button></div>
       <div class="list" id="mod-list"></div>`; content.appendChild(s);
       document.getElementById('mod-create').addEventListener('click', async ()=>{ const name=document.getElementById('mod-name').value; const coeff=parseFloat(document.getElementById('mod-coeff').value||'0'); const semId=parseInt(document.getElementById('mod-sem').value)||0; if(!name){ alert('Nom requis'); return;} const payload={ Name:name, Coiff: coeff }; if(semId>0) payload.Sem = { Id: semId }; await safeFetch('/api/modules',{method:'POST',body:JSON.stringify(payload)}); await loadModules(); document.getElementById('mod-name').value=''; });
       document.getElementById('mod-refresh').addEventListener('click', loadModules);
-      async function loadModules(){ const r = await safeFetch('/api/modules'); const list = await r.json(); const c=document.getElementById('mod-list'); c.innerHTML=''; list.forEach(m=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(m.name)}</strong><div class="meta">Coeff: ${m.coiff} • SemId: ${m.semId ?? ''}</div></div><div><button class="btn-muted" onclick="editMod(${m.id},'${escapeJs(m.name)}',${m.coiff||0})">Éditer</button><button class="danger" onclick="delMod(${m.id})">Supprimer</button></div>`; c.appendChild(node); }); }
+      async function loadModules(){ const r = await safeFetch('/api/modules'); const list = await r.json(); const c=document.getElementById('mod-list'); c.innerHTML=''; list.forEach(m=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(m.name)}</strong><div class="meta">Coeff: ${m.coiff} â€¢ SemId: ${m.semId ?? ''}</div></div><div><button class="btn-muted" onclick="editMod(${m.id},'${escapeJs(m.name)}',${m.coiff||0})">Ã‰diter</button><button class="danger" onclick="delMod(${m.id})">Supprimer</button></div>`; c.appendChild(node); }); }
       window.editMod = async (id,name,coeff)=>{ const n=prompt('Nom', name); if(n===null) return; const c=prompt('Coeff', coeff); if(c===null) return; await safeFetch('/api/modules/'+id,{method:'PUT',body:JSON.stringify({ Name:n, Coiff: parseFloat(c) })}); await loadModules(); }
       window.delMod = async (id)=>{ if(!confirm('Supprimer ?')) return; await safeFetch('/api/modules/'+id,{method:'DELETE'}); await loadModules(); }
       await loadModules();
@@ -157,57 +157,57 @@
     async function renderChapitres(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Chapitres</h2>
       <label>Titre</label><input id="chap-title" />
       <label>Contenu</label><textarea id="chap-content"></textarea>
-      <label>Durée</label><input id="chap-duree" />
+      <label>DurÃ©e</label><input id="chap-duree" />
       <label>ModuleId</label><input id="chap-mod" />
-      <div style="display:flex;gap:8px;margin-top:8px"><button id="chap-create">Créer</button><button id="chap-refresh" class="btn-muted">Rafraîchir</button></div>
+      <div style="display:flex;gap:8px;margin-top:8px"><button id="chap-create">CrÃ©er</button><button id="chap-refresh" class="btn-muted">RafraÃ®chir</button></div>
       <div class="list" id="chap-list"></div>`; content.appendChild(s);
       document.getElementById('chap-create').addEventListener('click', async ()=>{ const t=document.getElementById('chap-title').value; const c=document.getElementById('chap-content').value; const d=parseFloat(document.getElementById('chap-duree').value||'0'); const mid = parseInt(document.getElementById('chap-mod').value)||0; if(!t){ alert('Titre requis'); return;} const payload={ Title:t, Content:c, Duree:d }; if(mid>0) payload.Module = { Id: mid }; await safeFetch('/api/chapitres',{method:'POST',body:JSON.stringify(payload)}); await loadChapitres(); });
       document.getElementById('chap-refresh').addEventListener('click', loadChapitres);
-      async function loadChapitres(){ const r=await safeFetch('/api/chapitres'); const list=await r.json(); const c=document.getElementById('chap-list'); c.innerHTML=''; list.forEach(ch=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(ch.title)}</strong><div class="meta">Durée: ${ch.duree} • ModuleId: ${ch.moduleId ?? ''}</div></div><div><button class="btn-muted" onclick="genAct(${ch.id})">Générer activité</button><button class="btn-muted" onclick="editChap(${ch.id},'${escapeJs(ch.title)}')">Éditer</button><button class="danger" onclick="delChap(${ch.id})">Supprimer</button></div>`; c.appendChild(node); }); }
-      window.genAct = async (id)=>{ await safeFetch('/api/activities/generate/'+id,{method:'POST'}); alert('Activité générée'); }
-      window.editChap = async (id,title)=>{ const t = prompt('Titre', title); if(t===null) return; const c = prompt('Contenu'); if(c===null) return; const d = prompt('Durée'); if(d===null) return; await safeFetch('/api/chapitres/'+id,{method:'PUT',body:JSON.stringify({ Title:t, Content:c, Duree: parseFloat(d) })}); await loadChapitres(); }
+      async function loadChapitres(){ const r=await safeFetch('/api/chapitres'); const list=await r.json(); const c=document.getElementById('chap-list'); c.innerHTML=''; list.forEach(ch=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(ch.title)}</strong><div class="meta">DurÃ©e: ${ch.duree} â€¢ ModuleId: ${ch.moduleId ?? ''}</div></div><div><button class="btn-muted" onclick="genAct(${ch.id})">GÃ©nÃ©rer activitÃ©</button><button class="btn-muted" onclick="editChap(${ch.id},'${escapeJs(ch.title)}')">Ã‰diter</button><button class="danger" onclick="delChap(${ch.id})">Supprimer</button></div>`; c.appendChild(node); }); }
+      window.genAct = async (id)=>{ await safeFetch('/api/activities/generate/'+id,{method:'POST'}); alert('ActivitÃ© gÃ©nÃ©rÃ©e'); }
+      window.editChap = async (id,title)=>{ const t = prompt('Titre', title); if(t===null) return; const c = prompt('Contenu'); if(c===null) return; const d = prompt('DurÃ©e'); if(d===null) return; await safeFetch('/api/chapitres/'+id,{method:'PUT',body:JSON.stringify({ Title:t, Content:c, Duree: parseFloat(d) })}); await loadChapitres(); }
       window.delChap = async (id)=>{ if(!confirm('Supprimer ?')) return; await safeFetch('/api/chapitres/'+id,{method:'DELETE'}); await loadChapitres(); }
       await loadChapitres();
     }
 
     // --- ACTIVITIES ---
-    async function renderActivities(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Activités</h2>
+    async function renderActivities(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>ActivitÃ©s</h2>
         <div class="list" id="act-list"></div>`; content.appendChild(s);
-        async function loadActs(){ const r = await safeFetch('/api/activities'); const list = await r.json(); const c=document.getElementById('act-list'); c.innerHTML=''; list.forEach(a=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(a.title)}</strong><div class="meta">ChapitreId: ${a.chapitreId ?? ''}</div><pre style="margin:6px 0">${escapeHtml(a.instructions)}</pre></div><div><button class="btn-muted" onclick="editAct(${a.id},'${escapeJs(a.title)}')">Éditer</button><button class="danger" onclick="delAct(${a.id})">Supprimer</button></div>`; c.appendChild(node); }); }
+        async function loadActs(){ const r = await safeFetch('/api/activities'); const list = await r.json(); const c=document.getElementById('act-list'); c.innerHTML=''; list.forEach(a=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(a.title)}</strong><div class="meta">ChapitreId: ${a.chapitreId ?? ''}</div><pre style="margin:6px 0">${escapeHtml(a.instructions)}</pre></div><div><button class="btn-muted" onclick="editAct(${a.id},'${escapeJs(a.title)}')">Ã‰diter</button><button class="danger" onclick="delAct(${a.id})">Supprimer</button></div>`; c.appendChild(node); }); }
         window.editAct = async (id,title)=>{ const t = prompt('Titre', title); if(t===null) return; const inst = prompt('Instructions'); if(inst===null) return; await safeFetch('/api/activities/'+id,{method:'PUT',body:JSON.stringify({ Title:t, Instructions: inst })}); await loadActs(); }
         window.delAct = async (id)=>{ if(!confirm('Supprimer ?')) return; await safeFetch('/api/activities/'+id,{method:'DELETE'}); await loadActs(); }
         await loadActs();
     }
 
     // --- ETUDIANTS ---
-    async function renderStudents(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Étudiants</h2>
+    async function renderStudents(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Ã‰tudiants</h2>
       <label>Nom</label><input id="st-nom" />
-      <label>Prénom</label><input id="st-prenom" />
+      <label>PrÃ©nom</label><input id="st-prenom" />
       <label>Date (YYYY-MM-DD)</label><input id="st-date" />
       <label>Genre</label><input id="st-gender" />
-      <div style="display:flex;gap:8px;margin-top:8px"><button id="st-create">Créer</button><button id="st-refresh" class="btn-muted">Rafraîchir</button></div>
+      <div style="display:flex;gap:8px;margin-top:8px"><button id="st-create">CrÃ©er</button><button id="st-refresh" class="btn-muted">RafraÃ®chir</button></div>
       <div class="list" id="st-list"></div>`; content.appendChild(s);
-      document.getElementById('st-create').addEventListener('click', async ()=>{ const nom=document.getElementById('st-nom').value; const prenom=document.getElementById('st-prenom').value; const date=document.getElementById('st-date').value; const gender=document.getElementById('st-gender').value; if(!nom || !prenom){ alert('Nom/Prénom requis'); return;} await safeFetch('/api/studentapi',{method:'POST',body:JSON.stringify({ Nom:nom, Prenom:prenom, Date:date, Gender:gender })}); await loadStudents(); });
+      document.getElementById('st-create').addEventListener('click', async ()=>{ const nom=document.getElementById('st-nom').value; const prenom=document.getElementById('st-prenom').value; const date=document.getElementById('st-date').value; const gender=document.getElementById('st-gender').value; if(!nom || !prenom){ alert('Nom/PrÃ©nom requis'); return;} await safeFetch('/api/studentapi',{method:'POST',body:JSON.stringify({ Nom:nom, Prenom:prenom, Date:date, Gender:gender })}); await loadStudents(); });
       document.getElementById('st-refresh').addEventListener('click', loadStudents);
-      async function loadStudents(){ const r=await safeFetch('/api/studentapi'); const list=await r.json(); const c=document.getElementById('st-list'); c.innerHTML=''; list.forEach(s=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(s.nom)} ${escapeHtml(s.prenom)}</strong><div class="meta">Date: ${s.date} • Genre: ${escapeHtml(s.gender)}</div></div><div><button class="btn-muted" onclick="editStudent(${s.id},'${escapeJs(s.nom)}','${escapeJs(s.prenom)}')">Éditer</button><button class="danger" onclick="delStudent(${s.id})">Supprimer</button></div>`; c.appendChild(node); }); }
-      window.editStudent = async (id,nom,prenom)=>{ const n=prompt('Nom', nom); if(n===null) return; const p=prompt('Prénom', prenom); if(p===null) return; await safeFetch('/api/studentapi/'+id,{method:'PUT',body:JSON.stringify({ Nom:n, Prenom:p })}); await loadStudents(); }
+      async function loadStudents(){ const r=await safeFetch('/api/studentapi'); const list=await r.json(); const c=document.getElementById('st-list'); c.innerHTML=''; list.forEach(s=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(s.nom)} ${escapeHtml(s.prenom)}</strong><div class="meta">Date: ${s.date} â€¢ Genre: ${escapeHtml(s.gender)}</div></div><div><button class="btn-muted" onclick="editStudent(${s.id},'${escapeJs(s.nom)}','${escapeJs(s.prenom)}')">Ã‰diter</button><button class="danger" onclick="delStudent(${s.id})">Supprimer</button></div>`; c.appendChild(node); }); }
+      window.editStudent = async (id,nom,prenom)=>{ const n=prompt('Nom', nom); if(n===null) return; const p=prompt('PrÃ©nom', prenom); if(p===null) return; await safeFetch('/api/studentapi/'+id,{method:'PUT',body:JSON.stringify({ Nom:n, Prenom:p })}); await loadStudents(); }
       window.delStudent = async (id)=>{ if(!confirm('Supprimer ?')) return; await safeFetch('/api/studentapi/'+id,{method:'DELETE'}); await loadStudents(); }
       await loadStudents();
     }
 
     // --- HIERARCHY VIEW ---
-    async function renderHierarchy(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Structure hiérarchique</h2><div id="hier-tree" class="tree"></div>`; content.appendChild(s);
+    async function renderHierarchy(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Structure hiÃ©rarchique</h2><div id="hier-tree" class="tree"></div>`; content.appendChild(s);
       const tree = document.getElementById('hier-tree'); tree.innerHTML='Chargement...';
       const r = await safeFetch('/api/filiere'); const filieres = await r.json(); tree.innerHTML='';
       for(const f of filieres){ const node = document.createElement('div'); node.className='node'; node.innerHTML = `<strong>${escapeHtml(f.name)}</strong> <div class="meta">${escapeHtml(f.description||'')}</div>`; const ul = document.createElement('ul'); node.appendChild(ul); tree.appendChild(node);
           // load semestres for this filiere
-          try{ const rf = await safeFetch('/api/filiere/'+f.id); const full = await rf.json(); if(full.semestres){ full.semestres.forEach(smt=>{ const li = document.createElement('li'); li.innerHTML = `<div><strong>Semestre: ${escapeHtml(smt.name)}</strong></div>`; const mlist = document.createElement('ul'); li.appendChild(mlist); if(smt.modules){ smt.modules.forEach(m=>{ const mli = document.createElement('li'); mli.innerHTML = `<div>Module: <em>${escapeHtml(m.name)}</em></div>`; const clist = document.createElement('ul'); mli.appendChild(clist); if(m.chapitres){ m.chapitres.forEach(c=>{ const cli = document.createElement('li'); cli.innerHTML = `<div>Chapitre: ${escapeHtml(c.title)}</div>`; const alist = document.createElement('ul'); if(c.activities){ c.activities.forEach(a=>{ const ali = document.createElement('li'); ali.innerHTML = `Activité: ${escapeHtml(a.title)}`; alist.appendChild(ali); }); } cli.appendChild(alist); clist.appendChild(cli); }); } mlist.appendChild(mli); }); } ul.appendChild(li); }); }
+          try{ const rf = await safeFetch('/api/filiere/'+f.id); const full = await rf.json(); if(full.semestres){ full.semestres.forEach(smt=>{ const li = document.createElement('li'); li.innerHTML = `<div><strong>Semestre: ${escapeHtml(smt.name)}</strong></div>`; const mlist = document.createElement('ul'); li.appendChild(mlist); if(smt.modules){ smt.modules.forEach(m=>{ const mli = document.createElement('li'); mli.innerHTML = `<div>Module: <em>${escapeHtml(m.name)}</em></div>`; const clist = document.createElement('ul'); mli.appendChild(clist); if(m.chapitres){ m.chapitres.forEach(c=>{ const cli = document.createElement('li'); cli.innerHTML = `<div>Chapitre: ${escapeHtml(c.title)}</div>`; const alist = document.createElement('ul'); if(c.activities){ c.activities.forEach(a=>{ const ali = document.createElement('li'); ali.innerHTML = `ActivitÃ©: ${escapeHtml(a.title)}`; alist.appendChild(ali); }); } cli.appendChild(alist); clist.appendChild(cli); }); } mlist.appendChild(mli); }); } ul.appendChild(li); }); }
           }catch(e){ console.warn('failed to load full filiere', e); }
       }
     }
 
     // Helper: show single filiere hierarchy in a modal-like panel
-    function showHierarchySingle(f){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Filière: ${escapeHtml(f.name)}</h2><div class="meta">${escapeHtml(f.description||'')}</div><div id="single-hier"></div>`; content.appendChild(s); const container=document.getElementById('single-hier'); container.innerHTML=''; if(f.semestres){ f.semestres.forEach(smt=>{ const sm=document.createElement('div'); sm.style.marginTop='8px'; sm.innerHTML=`<strong>Semestre: ${escapeHtml(smt.name)}</strong>`; if(smt.modules){ const ml=document.createElement('div'); ml.style.marginLeft='12px'; smt.modules.forEach(m=>{ const md=document.createElement('div'); md.innerHTML=`Module: <em>${escapeHtml(m.name)}</em>`; if(m.chapitres){ const cl=document.createElement('div'); cl.style.marginLeft='12px'; m.chapitres.forEach(c=>{ const cd=document.createElement('div'); cd.innerHTML=`Chapitre: ${escapeHtml(c.title)}`; if(c.activities){ const al=document.createElement('div'); al.style.marginLeft='12px'; c.activities.forEach(a=>{ const ad=document.createElement('div'); ad.innerHTML=`Activité: ${escapeHtml(a.title)}`; al.appendChild(ad); }); cd.appendChild(al); } cl.appendChild(cd); }); md.appendChild(cl); } ml.appendChild(md); }); sm.appendChild(ml); } container.appendChild(sm); }); }
+    function showHierarchySingle(f){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>FiliÃ¨re: ${escapeHtml(f.name)}</h2><div class="meta">${escapeHtml(f.description||'')}</div><div id="single-hier"></div>`; content.appendChild(s); const container=document.getElementById('single-hier'); container.innerHTML=''; if(f.semestres){ f.semestres.forEach(smt=>{ const sm=document.createElement('div'); sm.style.marginTop='8px'; sm.innerHTML=`<strong>Semestre: ${escapeHtml(smt.name)}</strong>`; if(smt.modules){ const ml=document.createElement('div'); ml.style.marginLeft='12px'; smt.modules.forEach(m=>{ const md=document.createElement('div'); md.innerHTML=`Module: <em>${escapeHtml(m.name)}</em>`; if(m.chapitres){ const cl=document.createElement('div'); cl.style.marginLeft='12px'; m.chapitres.forEach(c=>{ const cd=document.createElement('div'); cd.innerHTML=`Chapitre: ${escapeHtml(c.title)}`; if(c.activities){ const al=document.createElement('div'); al.style.marginLeft='12px'; c.activities.forEach(a=>{ const ad=document.createElement('div'); ad.innerHTML=`ActivitÃ©: ${escapeHtml(a.title)}`; al.appendChild(ad); }); cd.appendChild(al); } cl.appendChild(cd); }); md.appendChild(cl); } ml.appendChild(md); }); sm.appendChild(ml); } container.appendChild(sm); }); }
     }
 
     // Navigation wiring
@@ -218,7 +218,7 @@
     document.getElementById('nav-activites').addEventListener('click', renderActivities);
     document.getElementById('nav-etudiants').addEventListener('click', renderStudents);
     document.getElementById('nav-hierarchy').addEventListener('click', renderHierarchy);
-    document.getElementById('refresh-all').addEventListener('click', ()=>{ const cur = content.firstElementChild; if(!cur) return; const h = cur.querySelector('h2'); if(!h) return; const txt=h.textContent||''; if(txt.includes('Fili')) renderFilieres(); if(txt.includes('Semest')) renderSemestres(); if(txt.includes('Module')) renderModules(); if(txt.includes('Chapitre')) renderChapitres(); if(txt.includes('Activit')) renderActivities(); if(txt.includes('Étudiant')) renderStudents(); if(txt.includes('Structure')) renderHierarchy(); });
+    document.getElementById('refresh-all').addEventListener('click', ()=>{ const cur = content.firstElementChild; if(!cur) return; const h = cur.querySelector('h2'); if(!h) return; const txt=h.textContent||''; if(txt.includes('Fili')) renderFilieres(); if(txt.includes('Semest')) renderSemestres(); if(txt.includes('Module')) renderModules(); if(txt.includes('Chapitre')) renderChapitres(); if(txt.includes('Activit')) renderActivities(); if(txt.includes('Ã‰tudiant')) renderStudents(); if(txt.includes('Structure')) renderHierarchy(); });
 
     // Utilities
     function escapeHtml(s){ if(s==null) return ''; return String(s).replace(/[&<>\"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','\\' : '\\', '"':'&quot;' }[c]||c)); }
