@@ -2,409 +2,75 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>isgasoir — Interface</title>
   <style>
-    :root{--bg:#f5f7fb;--panel:#ffffff;--accent:#1f6feb;--muted:#6b7280;--danger:#e11d48}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif;background:var(--bg);color:#0f172a}
-    header{background:#fff;border-bottom:1px solid #eef2f6;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
-    header h1{margin:0;font-size:18px}
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f5f7fb;color:#0f172a}
+    header{background:#fff;padding:12px 16px;border-bottom:1px solid #e6eef8}
     .app{display:flex;height:calc(100vh - 56px)}
-    nav{width:260px;border-right:1px solid #eef2f6;background:var(--panel);padding:12px;overflow:auto}
+    nav{width:220px;background:#fff;border-right:1px solid #e6eef8;padding:12px}
     main{flex:1;padding:16px;overflow:auto}
-    .sect{background:var(--panel);border-radius:8px;padding:12px;margin-bottom:12px;box-shadow:0 1px 2px rgba(2,6,23,0.04)}
-    label{display:block;font-weight:600;margin:6px 0 4px}
-    input,textarea,select{width:100%;padding:8px;border:1px solid #e6eef8;border-radius:6px}
-    textarea{min-height:80px}
-    .row{display:flex;gap:8px}
-    button{background:var(--accent);color:#fff;border:0;padding:8px 12px;border-radius:6px;cursor:pointer}
-    .btn-muted{background:#fff;color:var(--accent);border:1px solid #dbeafe}
-    .danger{background:var(--danger)}
-    .list{margin-top:8px}
-    .item{padding:8px;border:1px solid #eef2f6;border-radius:6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-    .item .meta{font-size:13px;color:var(--muted)}
-    .actions button{margin-left:6px}
-    .tree {font-size:14px}
-    .tree ul{list-style:none;padding-left:16px;margin:6px 0}
-    .tree .node{padding:6px;border-radius:6px}
-    .hint{font-size:13px;color:var(--muted)}
-    footer{padding:12px;text-align:center;color:var(--muted);font-size:13px}
-    /* modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:9999}
-    .modal{background:#fff;padding:16px;border-radius:8px;width:640px;max-width:95%}
-    .modal h3{margin:0 0 8px}
-    .modal textarea{height:160px}
-    .spinner{display:inline-block;width:16px;height:16px;border:2px solid #e5e7eb;border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @media(max-width:800px){nav{display:none} .app{flex-direction:column} }
+    button{display:block;margin:6px 0;padding:8px;border-radius:6px;border:1px solid #dbeafe;background:#fff;color:#1f6feb;cursor:pointer}
+    .sect{background:#fff;padding:12px;border-radius:6px}
+    .item{padding:8px;border-bottom:1px solid #eef2f6}
+    pre{white-space:pre-wrap}
   </style>
 </head>
 <body>
   <header>
-    <div>
-      <h1>isgasoir</h1>
-      <div class="hint">Interface de gestion — Français (UTF‑8)</div>
-    </div>
-    <div>
-      <button id="refresh-all" class="btn-muted">Rafraîchir</button>
-    </div>
+    <strong>isgasoir</strong>
   </header>
-
   <div class="app">
     <nav>
-      <section class="sect">
-        <h3>Navigation</h3>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
-          <button id="nav-filieres" class="btn-muted">Filières</button>
-          <button id="nav-semestres" class="btn-muted">Semestres</button>
-          <button id="nav-modules" class="btn-muted">Modules</button>
-          <button id="nav-chapitres" class="btn-muted">Chapitres</button>
-          <button id="nav-activites" class="btn-muted">Activités</button>
-          <button id="nav-etudiants" class="btn-muted">Étudiants</button>
-          <button id="nav-hierarchy" class="btn-muted">Structure</button>
-        </div>
-      </section>
-
-      <section class="sect">
-        <h4>Créer rapidement</h4>
-        <label>Filière</label>
-        <input id="quick-fil-name" placeholder="Nom de la filière" />
-        <label>Description</label>
-        <input id="quick-fil-desc" placeholder="Description" />
-        <div style="display:flex;gap:8px;margin-top:8px"><button id="quick-create-fil">Créer</button></div>
-      </section>
-
-      <section class="sect">
-        <h4>Raccourcis</h4>
-        <div class="hint">Utilisez les sections pour créer/éditer et consulter les entités. La structure permet d'explorer Filières → Semestres → Modules → Chapitres → Activités.</div>
-      </section>
+      <button id="nav-filieres">Filières</button>
+      <button id="nav-semestres">Semestres</button>
+      <button id="nav-modules">Modules</button>
+      <button id="nav-chapitres">Chapitres</button>
+      <button id="nav-activites">Activités</button>
+      <button id="nav-hierarchy">Structure</button>
+      <div style="margin-top:12px;color:#6b7280;font-size:13px">UI simplifiée pour debug</div>
     </nav>
-
     <main>
-      <!-- Container where sections will be rendered -->
-      <div id="content"></div>
-      <footer>isgasoir — interface de test</footer>
+      <div id="content" class="sect">Chargement...</div>
     </main>
   </div>
 
-  <!-- LLM Prompt Modal (hidden) -->
-  <div id="llm-modal" style="display:none" class="modal-backdrop">
-    <div class="modal">
-      <h3>Générer une activité - Prompt personnalisé</h3>
-      <label>Prompt</label>
-      <textarea id="llm-prompt"></textarea>
-      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
-        <button id="llm-cancel" class="btn-muted">Annuler</button>
-        <button id="llm-submit">Générer</button>
-      </div>
-      <div id="llm-status" style="margin-top:8px;color:var(--muted)"></div>
-    </div>
-  </div>
-
   <script>
-    const apiBase = '';
-    const content = document.getElementById('content');
-    let _pendingGenChapId = null;
-
-    function el(html){ const d = document.createElement('div'); d.innerHTML = html; return d.firstElementChild; }
-
-    async function safeFetch(path, opts){ opts = opts || {}; opts.headers = Object.assign({'Content-Type':'application/json; charset=utf-8'}, opts.headers||{}); try{ const r = await fetch(apiBase + path, opts); if(!r.ok){ const txt = await r.text(); throw new Error(r.status + ' ' + r.statusText + '\n' + txt); } return r; } catch(e){ alert('Erreur réseau: ' + e.message); throw e; } }
-
-    // --- FILIERES ---
-    async function renderFilieres(){ content.innerHTML='';
-      const s = document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Filières</h2>
-        <div>
-          <label>Nom</label><input id="fil-name" />
-          <label>Description</label><input id="fil-desc" />
-          <div style="display:flex;gap:8px;margin-top:8px"><button id="fil-create">Créer</button><button id="fil-refresh" class="btn-muted">Rafraîchir</button></div>
-        </div>
-        <div class="list" id="fil-list"></div>`;
-      content.appendChild(s);
-      document.getElementById('fil-create').addEventListener('click', async ()=>{
-        const name = document.getElementById('fil-name').value.trim(); const desc = document.getElementById('fil-desc').value.trim(); if(!name){ alert('Nom requis'); return; }
-        await safeFetch('/api/filiere', { method:'POST', body: JSON.stringify({ Name:name, Description:desc }) });
-        await loadFilieres();
-        document.getElementById('fil-name').value=''; document.getElementById('fil-desc').value='';
-      });
-      document.getElementById('fil-refresh').addEventListener('click', loadFilieres);
-      document.getElementById('quick-create-fil').addEventListener('click', async ()=>{ const n=document.getElementById('quick-fil-name').value; const d=document.getElementById('quick-fil-desc').value; if(!n){ alert('Nom requis'); return;} await safeFetch('/api/filiere',{method:'POST',body:JSON.stringify({Name:n,Description:d})}); document.getElementById('quick-fil-name').value=''; document.getElementById('quick-fil-desc').value=''; loadFilieres(); });
-      async function loadFilieres(){ const r = await safeFetch('/api/filiere'); const list = await r.json(); const container = document.getElementById('fil-list'); container.innerHTML=''; list.forEach(f=>{ const node = document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(f.name)}</strong><div class="meta">${escapeHtml(f.description||'')}</div></div>
-            <div class="actions">
-              <button class="btn-muted" data-id="${f.id}" onclick="editF(${f.id})">Éditer</button>
-              <button class="btn-muted" data-id="${f.id}" onclick="viewF(${f.id})">Voir</button>
-              <button class="danger" data-id="${f.id}" onclick="delF(${f.id})">Supprimer</button>
-            </div>`; container.appendChild(node); });
+    (function(){
+      function safeFetchJson(path){
+        return fetch(path, { headers: { 'Accept': 'application/json' } }).then(function(r){ if(!r.ok) throw new Error(r.status + ' ' + r.statusText); return r.json(); });
       }
-      window.editF = async (id)=>{ const name = prompt('Nom'); if(name===null) return; const desc = prompt('Description'); if(desc===null) return; await safeFetch('/api/filiere/'+id,{method:'PUT', body: JSON.stringify({ Name:name, Description:desc })}); await loadFilieres(); }
-      window.viewF = async (id)=>{ // show hierarchy for this filiere
-        const r = await safeFetch('/api/filiere/'+id); const f = await r.json(); showHierarchySingle(f);
+
+      function renderList(title, items, formatter){
+        var c = document.getElementById('content'); c.innerHTML='';
+        var h = document.createElement('h2'); h.innerText = title; c.appendChild(h);
+        if(!items || items.length===0){ var p = document.createElement('div'); p.innerText='Aucun élément'; c.appendChild(p); return; }
+        items.forEach(function(it){ var d = document.createElement('div'); d.className='item'; d.innerText = formatter ? formatter(it) : JSON.stringify(it); c.appendChild(d); });
       }
-      window.delF = async (id)=>{ if(!confirm('Supprimer ?')) return; await safeFetch('/api/filiere/'+id,{method:'DELETE'}); await loadFilieres(); }
-      await loadFilieres();
-    }
 
-    // --- SEMESTRES ---
-    async function renderSemestres(){ content.innerHTML=''; const s = document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Semestres</h2>
-        <label>Nom</label><input id="sem-name" />
-        <label>FiliereId (optionnel)</label><input id="sem-fil" />
-        <div style="display:flex;gap:8px;margin-top:8px"><button id="sem-create">Créer</button><button id="sem-refresh" class="btn-muted">Rafraîchir</button></div>
-        <div class="list" id="sem-list"></div>`; content.appendChild(s);
-      document.getElementById('sem-create').addEventListener('click', async ()=>{ const name=document.getElementById('sem-name').value; const fid = parseInt(document.getElementById('sem-fil').value)||null; if(!name){ alert('Nom requis'); return;} await safeFetch('/api/semestre',{method:'POST',body:JSON.stringify({ Name:name, FiliereId: fid })}); await loadSemestres(); document.getElementById('sem-name').value=''; document.getElementById('sem-fil').value=''; });
-      document.getElementById('sem-refresh').addEventListener('click', loadSemestres);
-      async function loadSemestres(){ const r = await safeFetch('/api/semestre'); const list = await r.json(); const container = document.getElementById('sem-list'); container.innerHTML=''; list.forEach(smt=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(smt.name)}</strong><div class="meta">FiliereId: ${smt.filiereId ?? ''}</div></div>
-              <div><button class="btn-muted" onclick="editSem(${smt.id},'${escapeJs(smt.name)}')">Éditer</button><button class="danger" onclick="delSem(${smt.id})">Supprimer</button></div>`; container.appendChild(node); }); }
-      window.editSem = async (id,name)=>{ const n = prompt('Nom', name); if(n===null) return; await safeFetch('/api/semestre/'+id,{method:'PUT',body:JSON.stringify({ Name:n })}); await loadSemestres(); }
-      window.delSem = async (id)=>{ if(!confirm('Supprimer ?')) return; await safeFetch('/api/semestre/'+id,{method:'DELETE'}); await loadSemestres(); }
-      await loadSemestres();
-    }
+      function renderFilieres(){ safeFetchJson('/api/filiere').then(function(list){ renderList('Filières', list, function(f){ return f.name + ' — ' + (f.description||''); }); }).catch(showError); }
+      function renderSemestres(){ safeFetchJson('/api/semestre').then(function(list){ renderList('Semestres', list, function(s){ return s.name + ' — FiliereId:' + (s.filiereId||''); }); }).catch(showError); }
+      function renderModules(){ safeFetchJson('/api/modules').then(function(list){ renderList('Modules', list, function(m){ return m.name + ' — Coeff:' + (m.coiff||m.coeff||''); }); }).catch(showError); }
+      function renderChapitres(){ safeFetchJson('/api/chapitres').then(function(list){ renderList('Chapitres', list, function(ch){ return ch.title + ' — Durée:' + (ch.duree||''); }); }).catch(showError); }
+      function renderActivities(){ safeFetchJson('/api/activities').then(function(list){ renderList('Activités', list, function(a){ return a.title + ' — ChapitreId:' + (a.chapitreId||''); }); }).catch(showError); }
+      function renderHierarchy(){ safeFetchJson('/api/filiere').then(function(list){ var c = document.getElementById('content'); c.innerHTML=''; var h = document.createElement('h2'); h.innerText = 'Structure hiérarchique'; c.appendChild(h); list.forEach(function(f){ var d = document.createElement('div'); d.className='item'; var t = document.createElement('div'); t.innerText = f.name + ' — ' + (f.description||''); d.appendChild(t); var btn = document.createElement('button'); btn.innerText = 'Afficher détails'; btn.style.display='inline-block'; btn.onclick = function(){ safeFetchJson('/api/filiere/' + f.id).then(function(full){ var pre = document.createElement('pre'); pre.innerText = JSON.stringify(full, null, 2); d.appendChild(pre); }).catch(showError); }; d.appendChild(btn); c.appendChild(d); }); }).catch(showError); }
 
-    // --- MODULES ---
-    async function renderModules(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Modules</h2>
-      <label>Nom</label><input id="mod-name" />
-      <label>Coefficient</label><input id="mod-coeff" />
-      <label>SemestreId</label><input id="mod-sem" />
-      <div style="display:flex;gap:8px;margin-top:8px"><button id="mod-create">Créer</button><button id="mod-refresh" class="btn-muted">Rafraîchir</button></div>
-      <div class="list" id="mod-list"></div>`; content.appendChild(s);
-      document.getElementById('mod-create').addEventListener('click', async ()=>{ const name=document.getElementById('mod-name').value; const coeff=parseFloat(document.getElementById('mod-coeff').value||'0'); const semId=parseInt(document.getElementById('mod-sem').value)||0; if(!name){ alert('Nom requis'); return;} const payload={ Name:name, Coiff: coeff }; if(semId>0) payload.Sem = { Id: semId }; await safeFetch('/api/modules',{method:'POST',body:JSON.stringify(payload)}); await loadModules(); document.getElementById('mod-name').value=''; });
-      document.getElementById('mod-refresh').addEventListener('click', loadModules);
-      async function loadModules(){ const r = await safeFetch('/api/modules'); const list = await r.json(); const c=document.getElementById('mod-list'); c.innerHTML=''; list.forEach(m=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(m.name)}</strong><div class="meta">Coeff: ${m.coiff} • SemId: ${m.semId ?? ''}</div></div><div><button class="btn-muted" onclick="editMod(${m.id},'${escapeJs(m.name)}',${m.coiff||0})">Éditer</button><button class="danger" onclick="delMod(${m.id})">Supprimer</button></div>`; c.appendChild(node); }); }
-      window.editMod = async (id,name,coeff)=>{ const n=prompt('Nom', name); if(n===null) return; const c=prompt('Coeff', coeff); if(c===null) return; await safeFetch('/api/modules/'+id,{method:'PUT',body:JSON.stringify({ Name:n, Coiff: parseFloat(c) })}); await loadModules(); }
-      window.delMod = async (id)=>{ if(!confirm('Supprimer ?')) return; await safeFetch('/api/modules/'+id,{method:'DELETE'}); await loadModules(); }
-      await loadModules();
-    }
+      function showError(e){ var c = document.getElementById('content'); c.innerHTML = ''; var d = document.createElement('div'); d.style.color = '#c00'; d.innerText = 'Erreur: ' + (e && e.message ? e.message : String(e)); c.appendChild(d); console.error(e); }
 
-    // --- CHAPITRES ---
-    async function renderChapitres(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Chapitres</h2>
-      <label>Titre</label><input id="chap-title" />
-      <label>Contenu</label><textarea id="chap-content"></textarea>
-      <label>Durée</label><input id="chap-duree" />
-      <label>ModuleId</label><input id="chap-mod" />
-      <div style="display:flex;gap:8px;margin-top:8px"><button id="chap-create">Créer</button><button id="chap-refresh" class="btn-muted">Rafraîchir</button></div>
-      <div class="list" id="chap-list"></div>`; content.appendChild(s);
-      document.getElementById('chap-create').addEventListener('click', async ()=>{ const t=document.getElementById('chap-title').value; const c=document.getElementById('chap-content').value; const d=parseFloat(document.getElementById('chap-duree').value||'0'); const mid = parseInt(document.getElementById('chap-mod').value)||0; if(!t){ alert('Titre requis'); return;} const payload={ Title:t, Content:c, Duree:d }; if(mid>0) payload.Module = { Id: mid }; await safeFetch('/api/chapitres',{method:'POST',body:JSON.stringify(payload)}); await loadChapitres(); });
-      document.getElementById('chap-refresh').addEventListener('click', loadChapitres);
-      async function loadChapitres(){ const r=await safeFetch('/api/chapitres'); const list=await r.json(); const c=document.getElementById('chap-list'); c.innerHTML=''; list.forEach(ch=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(ch.title)}</strong><div class="meta">Durée: ${ch.duree} • ModuleId: ${ch.moduleId ?? ''}</div></div><div><button class="btn-muted" onclick="openGenPrompt(${ch.id},'${escapeJs(ch.title)}')">Générer activité</button><button class="btn-muted" onclick="editChap(${ch.id},'${escapeJs(ch.title)}')">Éditer</button><button class="danger" onclick="delChap(${ch.id})">Supprimer</button></div>`; c.appendChild(node); }); }
-      document.openGenPrompt = undefined;
-      window.openGenPrompt = function(chapId, chapTitle){
-        const modal = document.getElementById('llm-modal');
-        document.getElementById('llm-prompt').value = `Génère une activité pédagogique pour le chapitre "${chapTitle}". Donner un titre et des instructions claires.`;
-        modal.style.display = 'flex';
-        _pendingGenChapId = chapId;
-      }
-      document.getElementById('llm-cancel').addEventListener('click', ()=>{ document.getElementById('llm-modal').style.display='none'; _pendingGenChapId=null; document.getElementById('llm-status').textContent=''; });
-      document.getElementById('llm-submit').addEventListener('click', async ()=>{
-        const prompt = document.getElementById('llm-prompt').value.trim(); if(!prompt) { alert('Prompt requis'); return; }
-        const btn = document.getElementById('llm-submit'); btn.disabled = true; document.getElementById('llm-status').innerHTML = '<span class="spinner"></span> Génération en cours...';
-        try{
-          const resp = await safeFetch('/api/activities/generate/' + _pendingGenChapId, { method: 'POST', body: JSON.stringify({ Prompt: prompt }) });
-          const created = await resp.json();
-          document.getElementById('llm-status').textContent = 'Activité générée: ' + created.title;
-          // refresh chapters list and activities
-          await loadChapitres();
-          // hide after short delay
-          setTimeout(()=>{ document.getElementById('llm-modal').style.display='none'; document.getElementById('llm-status').textContent=''; _pendingGenChapId=null; }, 900);
-        }catch(e){ console.error(e); document.getElementById('llm-status').textContent = 'Erreur lors de la génération'; }
-        finally{ btn.disabled = false; }
-      });
-
-    // --- ACTIVITIES ---
-    async function renderActivities(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Activités</h2>
-        <div>
-          <label>Titre</label><input id="act-title" />
-          <label>Instructions</label><textarea id="act-instr"></textarea>
-          <label>Chapitre</label>
-          <select id="act-chap"><option value="">(sélectionner un chapitre)</option></select>
-          <div style="display:flex;gap:8px;margin-top:8px"><button id="act-create">Créer</button><button id="act-refresh" class="btn-muted">Rafraîchir</button></div>
-        </div>
-        <div class="list" id="act-list"></div>`; content.appendChild(s);
-
-        // load chapters into select
-        async function loadChaptersIntoSelect(){
-            const sel = document.getElementById('act-chap');
-            sel.innerHTML = '<option value="">(sélectionner un chapitre)</option>';
-            try{
-                const r = await safeFetch('/api/chapitres');
-                const list = await r.json();
-                list.forEach(ch => {
-                    const opt = document.createElement('option');
-                    opt.value = ch.id;
-                    opt.textContent = `${ch.title} (${ch.id})`;
-                    sel.appendChild(opt);
-                });
-            }catch(e){ console.warn('Impossible de charger les chapitres', e); }
-        }
-
-        document.getElementById('act-create').addEventListener('click', async ()=>{
-            const title = document.getElementById('act-title').value.trim();
-            const instr = document.getElementById('act-instr').value.trim();
-            const chapId = parseInt(document.getElementById('act-chap').value)||0;
-            if(!title){ alert('Titre requis'); return; }
-            if(!chapId){ alert('Veuillez sélectionner un chapitre'); return; }
-            try{
-                await safeFetch('/api/activities', { method:'POST', body: JSON.stringify({ Title: title, Instructions: instr, ChapitreId: chapId }) });
-                document.getElementById('act-title').value=''; document.getElementById('act-instr').value=''; document.getElementById('act-chap').value='';
-                await loadActs();
-            }catch(e){ console.error(e); }
-        });
-        document.getElementById('act-refresh').addEventListener('click', loadActs);
-        async function loadActs(){ const r = await safeFetch('/api/activities'); const list = await r.json(); const c=document.getElementById('act-list'); c.innerHTML=''; list.forEach(a=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(a.title)}</strong><div class="meta">ChapitreId: ${a.chapitreId ?? a.chapitreId ?? ''}</div><pre style="margin:6px 0">${escapeHtml(a.instructions)}</pre></div><div><button class="btn-muted" onclick="editAct(${a.id},'${escapeJs(a.title)}')">Éditer</button><button class="danger" onclick="delAct(${a.id})">Supprimer</button></div>`; c.appendChild(node); }); }
-        window.editAct = async (id,title)=>{ const t = prompt('Titre', title); if(t===null) return; const inst = prompt('Instructions'); if(inst===null) return; await safeFetch('/api/activities/'+id,{method:'PUT',body:JSON.stringify({ Title:t, Instructions: inst })}); await loadActs(); }
-        window.delAct = async (id)=>{ if(!confirm('Supprimer ?')) return; await safeFetch('/api/activities/'+id,{method:'DELETE'}); await loadActs(); }
-        await loadChaptersIntoSelect();
-        await loadActs();
-    }
-
-    // --- ETUDIANTS ---
-    async function renderStudents(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Étudiants</h2>
-      <label>Nom</label><input id="st-nom" />
-      <label>Prénom</label><input id="st-prenom" />
-      <label>Date (YYYY-MM-DD)</label><input id="st-date" />
-      <label>Genre</label><input id="st-gender" />
-      <div style="display:flex;gap:8px;margin-top:8px"><button id="st-create">Créer</button><button id="st-refresh" class="btn-muted">Rafraîchir</button></div>
-      <div class="list" id="st-list"></div>`; content.appendChild(s);
-      document.getElementById('st-create').addEventListener('click', async ()=>{ const nom=document.getElementById('st-nom').value; const prenom=document.getElementById('st-prenom').value; const date=document.getElementById('st-date').value; const gender=document.getElementById('st-gender').value; if(!nom || !prenom){ alert('Nom/Prénom requis'); return;} await safeFetch('/api/studentapi',{method:'POST',body:JSON.stringify({ Nom:nom, Prenom:prenom, Date:date, Gender:gender })}); await loadStudents(); });
-      document.getElementById('st-refresh').addEventListener('click', loadStudents);
-      async function loadStudents(){ const r=await safeFetch('/api/studentapi'); const list=await r.json(); const c=document.getElementById('st-list'); c.innerHTML=''; list.forEach(s=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(s.nom)} ${escapeHtml(s.prenom)}</strong><div class="meta">Date: ${s.date} • Genre: ${escapeHtml(s.gender)}</div></div><div><button class="btn-muted" onclick="editStudent(${s.id},'${escapeJs(s.nom)}','${escapeJs(s.prenom)}')">Éditer</button><button class="danger" onclick="delStudent(${s.id})">Supprimer</button></div>`; c.appendChild(node); }); }
-      window.editStudent = async (id,nom,prenom)=>{ const n=prompt('Nom', nom); if(n===null) return; const p=prompt('Prénom', prenom); if(p===null) return; await safeFetch('/api/studentapi/'+id,{method:'PUT',body:JSON.stringify({ Nom:n, Prenom:p })}); await loadStudents(); }
-      window.delStudent = async (id)=>{ if(!confirm('Supprimer ?')) return; await safeFetch('/api/studentapi/'+id,{method:'DELETE'}); await loadStudents(); }
-      await loadStudents();
-    }
-
-    // --- HIERARCHY VIEW (lazy expand) ---
-    async function renderHierarchy(){
-      content.innerHTML='';
-      const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Structure hiérarchique</h2><div id="hier-tree" class="tree"></div>`; content.appendChild(s);
-      const tree = document.getElementById('hier-tree');
-      tree.innerHTML='Chargement...';
-      try{
-        const r = await safeFetch('/api/filiere');
-        const filieres = await r.json();
-        tree.innerHTML='';
-        filieres.forEach(f=>{
-          const node = document.createElement('div');
-          node.className='node';
-          node.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${escapeHtml(f.name)}</strong><div class="meta">${escapeHtml(f.description||'')}</div></div><div><button class="btn-muted" data-id="${f.id}">Afficher</button></div></div>`;
-          const childrenContainer = document.createElement('div');
-          childrenContainer.style.marginTop='6px';
-          node.appendChild(childrenContainer);
-          tree.appendChild(node);
-
-          const btn = node.querySelector('button');
-          btn.addEventListener('click', async () => {
-            if (childrenContainer.dataset.loaded === 'true'){
-              // toggle visibility
-              childrenContainer.style.display = childrenContainer.style.display === 'none' ? '' : 'none';
-              return;
-            }
-            btn.disabled = true; btn.textContent = 'Chargement...';
-            try{
-              const rf = await safeFetch('/api/filiere/'+f.id);
-              const full = await rf.json();
-              // build semestres -> modules -> chapitres -> activities
-              const ulS = document.createElement('ul');
-              if (full.semestres && full.semestres.length>0){
-                full.semestres.forEach(smt => {
-                  const liS = document.createElement('li');
-                  liS.innerHTML = `<div><strong>Semestre: ${escapeHtml(smt.name)}</strong></div>`;
-                  const ulM = document.createElement('ul');
-                  if (smt.modules && smt.modules.length>0){
-                    smt.modules.forEach(m => {
-                      const liM = document.createElement('li');
-                      liM.innerHTML = `<div>Module: <em>${escapeHtml(m.name)}</em></div>`;
-                      const ulC = document.createElement('ul');
-                      if (m.chapitres && m.chapitres.length>0){
-                        m.chapitres.forEach(c => {
-                          const liC = document.createElement('li');
-                          liC.innerHTML = `<div>Chapitre: ${escapeHtml(c.title)}</div>`;
-                          const ulA = document.createElement('ul');
-                          if (c.activities && c.activities.length>0){
-                            c.activities.forEach(a => {
-                              const liA = document.createElement('li');
-                              liA.innerHTML = `Activité: ${escapeHtml(a.title)}`;
-                              ulA.appendChild(liA);
-                            });
-                          }
-                          liC.appendChild(ulA);
-                          ulC.appendChild(liC);
-                        });
-                      }
-                      liM.appendChild(ulC);
-                      ulM.appendChild(liM);
-                    });
-                  }
-                  liS.appendChild(ulM);
-                  ulS.appendChild(liS);
-                });
-              } else {
-                ulS.innerHTML = '<li class="meta">(Aucun semestre)</li>';
-              }
-              childrenContainer.appendChild(ulS);
-              childrenContainer.dataset.loaded = 'true';
-            }catch(e){
-              childrenContainer.innerHTML = '<div class="meta">Erreur lors du chargement</div>';
-            } finally{
-              btn.disabled = false; btn.textContent = 'Afficher';
-            }
-          });
-        });
-      }catch(e){
-        tree.innerHTML = '<div class="meta">Impossible de charger la structure</div>';
-      }
-    }
-
-    // Helper: show single filiere hierarchy in a modal-like panel
-    function showHierarchySingle(f){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Filière: ${escapeHtml(f.name)}</h2><div class="meta">${escapeHtml(f.description||'')}</div><div id="single-hier"></div>`; content.appendChild(s); const container=document.getElementById('single-hier'); container.innerHTML=''; if(f.semestres){ f.semestres.forEach(smt=>{ const sm=document.createElement('div'); sm.style.marginTop='8px'; sm.innerHTML=`<strong>Semestre: ${escapeHtml(smt.name)}</strong>`; if(smt.modules){ const ml=document.createElement('div'); ml.style.marginLeft='12px'; smt.modules.forEach(m=>{ const md=document.createElement('div'); md.innerHTML=`Module: <em>${escapeHtml(m.name)}</em>`; if(m.chapitres){ const cl=document.createElement('div'); cl.style.marginLeft='12px'; m.chapitres.forEach(c=>{ const cd=document.createElement('div'); cd.innerHTML=`Chapitre: ${escapeHtml(c.title)}`; if(c.activities){ const al=document.createElement('div'); al.style.marginLeft='12px'; c.activities.forEach(a=>{ const ad=document.createElement('div'); ad.innerHTML=`Activité: ${escapeHtml(a.title)}`; al.appendChild(ad); }); cd.appendChild(al); } cl.appendChild(cd); }); md.appendChild(cl); } ml.appendChild(md); }); sm.appendChild(ml); } container.appendChild(sm); }); }
-    }
-
-    // Global JS error handler — shows error in UI so we can debug when something breaks
-    window.onerror = function(message, source, lineno, colno, error) {
-      console.error('JS error', message, source, lineno, colno, error);
-      try {
-        const c = document.getElementById('content');
-        if (c) c.innerHTML = `<div class="sect"><strong>Erreur JavaScript :</strong><div style="color:#c00">${escapeHtml(String(message))} (ligne ${lineno})</div></div>`;
-      } catch(e) { console.error(e); }
-      return false; // allow default handling
-    };
-
-    // Utilities
-    function escapeHtml(s){ if(s==null) return ''; return String(s).replace(/[&<>\"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','\\' : '\\', '"':'&quot;' }[c]||c)); }
-    function escapeJs(s){ return (s||'').replace(/'/g, "\\'").replace(/\n/g,'\\n'); }
-
-    // Wire navigation and initialize UI. Works even if DOMContentLoaded already fired.
-    (function initNavigation(){
+      // attach events robustly
       function wire(){
-        try {
-          const nav = document.getElementById('nav-filieres'); if(nav) nav.addEventListener('click', renderFilieres);
-          const n2 = document.getElementById('nav-semestres'); if(n2) n2.addEventListener('click', renderSemestres);
-          const n3 = document.getElementById('nav-modules'); if(n3) n3.addEventListener('click', renderModules);
-          const n4 = document.getElementById('nav-chapitres'); if(n4) n4.addEventListener('click', renderChapitres);
-          const n5 = document.getElementById('nav-activites'); if(n5) n5.addEventListener('click', renderActivities);
-          const n6 = document.getElementById('nav-etudiants'); if(n6) n6.addEventListener('click', renderStudents);
-          const n7 = document.getElementById('nav-hierarchy'); if(n7) n7.addEventListener('click', renderHierarchy);
-          const r = document.getElementById('refresh-all'); if(r) r.addEventListener('click', ()=>{
-            const cur = content.firstElementChild; if(!cur) return; const h = cur.querySelector('h2'); if(!h) return; const txt=h.textContent||'';
-            if(txt.includes('Fili')) renderFilieres();
-            if(txt.includes('Semest')) renderSemestres();
-            if(txt.includes('Module')) renderModules();
-            if(txt.includes('Chapitre')) renderChapitres();
-            if(txt.includes('Activit')) renderActivities();
-            if(txt.includes('Étudiant')) renderStudents();
-            if(txt.includes('Structure')) renderHierarchy();
-          });
-
-          // initial view
-          renderFilieres();
-        } catch(err){ console.error('Navigation wiring failed', err); }
+        var el;
+        el = document.getElementById('nav-filieres'); if(el) el.addEventListener('click', renderFilieres);
+        el = document.getElementById('nav-semestres'); if(el) el.addEventListener('click', renderSemestres);
+        el = document.getElementById('nav-modules'); if(el) el.addEventListener('click', renderModules);
+        el = document.getElementById('nav-chapitres'); if(el) el.addEventListener('click', renderChapitres);
+        el = document.getElementById('nav-activites'); if(el) el.addEventListener('click', renderActivities);
+        el = document.getElementById('nav-hierarchy'); if(el) el.addEventListener('click', renderHierarchy);
       }
 
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', wire);
-      } else {
-        // DOM already ready
-        wire();
-      }
+      if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
+      // initial
+      renderFilieres();
     })();
   </script>
 </body>
