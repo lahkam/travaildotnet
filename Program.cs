@@ -42,6 +42,74 @@ using (var scope = app.Services.CreateScope())
 
 // Serve frontend static files from wwwroot
 // Serve default files and ensure HTML static files are sent with charset=utf-8
+// Normalize request encoding (convert common UTF-16 payloads to UTF-8) to avoid garbled accents
+app.Use(async (context, next) =>
+{
+    // Only operate for requests with a body
+    if (context.Request.ContentLength.GetValueOrDefault() > 0)
+    {
+        context.Request.EnableBuffering();
+        // read raw bytes
+        using var ms = new System.IO.MemoryStream();
+        await context.Request.Body.CopyToAsync(ms);
+        var bytes = ms.ToArray();
+        // detect BOM for UTF-16 LE/BE
+        if (bytes.Length >= 2)
+        {
+            if (bytes[0] == 0xFF && bytes[1] == 0xFE)
+            {
+                // UTF-16 LE
+                var str = System.Text.Encoding.Unicode.GetString(bytes, 2, bytes.Length - 2);
+                var utf8 = System.Text.Encoding.UTF8.GetBytes(str);
+                context.Request.Body = new System.IO.MemoryStream(utf8);
+                context.Request.ContentLength = utf8.Length;
+                context.Request.ContentType = (context.Request.ContentType ?? "application/json") + "; charset=utf-8";
+            }
+            else if (bytes[0] == 0xFE && bytes[1] == 0xFF)
+            {
+                // UTF-16 BE
+                var str = System.Text.Encoding.BigEndianUnicode.GetString(bytes, 2, bytes.Length - 2);
+                var utf8 = System.Text.Encoding.UTF8.GetBytes(str);
+                context.Request.Body = new System.IO.MemoryStream(utf8);
+                context.Request.ContentLength = utf8.Length;
+                context.Request.ContentType = (context.Request.ContentType ?? "application/json") + "; charset=utf-8";
+            }
+            else
+            {
+                // try to detect UTF-8 validity; if invalid, attempt best-effort conversion from UTF-16
+                try
+                {
+                    _ = System.Text.Encoding.UTF8.GetString(bytes);
+                    // valid UTF-8 - put stream back
+                    context.Request.Body = new System.IO.MemoryStream(bytes);
+                    context.Request.ContentLength = bytes.Length;
+                }
+                catch
+                {
+                    // fallback: interpret as UTF-16LE and convert
+                    try
+                    {
+                        var str = System.Text.Encoding.Unicode.GetString(bytes);
+                        var utf8 = System.Text.Encoding.UTF8.GetBytes(str);
+                        context.Request.Body = new System.IO.MemoryStream(utf8);
+                        context.Request.ContentLength = utf8.Length;
+                        context.Request.ContentType = (context.Request.ContentType ?? "application/json") + "; charset=utf-8";
+                    }
+                    catch { context.Request.Body = new System.IO.MemoryStream(bytes); }
+                }
+            }
+        }
+        else
+        {
+            // small body - restore
+            context.Request.Body = new System.IO.MemoryStream(bytes);
+            context.Request.ContentLength = bytes.Length;
+        }
+        context.Request.Body.Position = 0;
+    }
+    await next();
+});
+
 // Request logging middleware for diagnostics
 app.Use(async (context, next) =>
 {
