@@ -41,6 +41,20 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Serve frontend static files from wwwroot
+// Ensure HTML responses include charset=utf-8 so accents display correctly
+app.Use(async (context, next) =>
+{
+    await next();
+    var ct = context.Response.ContentType;
+    if (!string.IsNullOrEmpty(ct) && ct.StartsWith("text/html", StringComparison.OrdinalIgnoreCase))
+    {
+        if (!ct.Contains("charset=", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.ContentType = "text/html; charset=utf-8";
+        }
+    }
+});
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
