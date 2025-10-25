@@ -31,6 +31,13 @@
     .tree .node{padding:6px;border-radius:6px}
     .hint{font-size:13px;color:var(--muted)}
     footer{padding:12px;text-align:center;color:var(--muted);font-size:13px}
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:9999}
+    .modal{background:#fff;padding:16px;border-radius:8px;width:640px;max-width:95%}
+    .modal h3{margin:0 0 8px}
+    .modal textarea{height:160px}
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid #e5e7eb;border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
     @media(max-width:800px){nav{display:none} .app{flex-direction:column} }
   </style>
 </head>
@@ -38,7 +45,7 @@
   <header>
     <div>
       <h1>isgasoir</h1>
-      <div class="hint">Interface de gestion — Français (UTF?8)</div>
+      <div class="hint">Interface de gestion — Français (UTF‑8)</div>
     </div>
     <div>
       <button id="refresh-all" class="btn-muted">Rafraîchir</button>
@@ -71,7 +78,7 @@
 
       <section class="sect">
         <h4>Raccourcis</h4>
-        <div class="hint">Utilisez les sections pour créer/éditer et consulter les entités. La structure permet d'explorer Filières ? Semestres ? Modules ? Chapitres ? Activités.</div>
+        <div class="hint">Utilisez les sections pour créer/éditer et consulter les entités. La structure permet d'explorer Filières → Semestres → Modules → Chapitres → Activités.</div>
       </section>
     </nav>
 
@@ -82,9 +89,24 @@
     </main>
   </div>
 
+  <!-- LLM Prompt Modal (hidden) -->
+  <div id="llm-modal" style="display:none" class="modal-backdrop">
+    <div class="modal">
+      <h3>Générer une activité - Prompt personnalisé</h3>
+      <label>Prompt</label>
+      <textarea id="llm-prompt"></textarea>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+        <button id="llm-cancel" class="btn-muted">Annuler</button>
+        <button id="llm-submit">Générer</button>
+      </div>
+      <div id="llm-status" style="margin-top:8px;color:var(--muted)"></div>
+    </div>
+  </div>
+
   <script>
     const apiBase = '';
     const content = document.getElementById('content');
+    let _pendingGenChapId = null;
 
     function el(html){ const d = document.createElement('div'); d.innerHTML = html; return d.firstElementChild; }
 
@@ -163,12 +185,29 @@
       <div class="list" id="chap-list"></div>`; content.appendChild(s);
       document.getElementById('chap-create').addEventListener('click', async ()=>{ const t=document.getElementById('chap-title').value; const c=document.getElementById('chap-content').value; const d=parseFloat(document.getElementById('chap-duree').value||'0'); const mid = parseInt(document.getElementById('chap-mod').value)||0; if(!t){ alert('Titre requis'); return;} const payload={ Title:t, Content:c, Duree:d }; if(mid>0) payload.Module = { Id: mid }; await safeFetch('/api/chapitres',{method:'POST',body:JSON.stringify(payload)}); await loadChapitres(); });
       document.getElementById('chap-refresh').addEventListener('click', loadChapitres);
-      async function loadChapitres(){ const r=await safeFetch('/api/chapitres'); const list=await r.json(); const c=document.getElementById('chap-list'); c.innerHTML=''; list.forEach(ch=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(ch.title)}</strong><div class="meta">Durée: ${ch.duree} • ModuleId: ${ch.moduleId ?? ''}</div></div><div><button class="btn-muted" onclick="genAct(${ch.id})">Générer activité</button><button class="btn-muted" onclick="editChap(${ch.id},'${escapeJs(ch.title)}')">Éditer</button><button class="danger" onclick="delChap(${ch.id})">Supprimer</button></div>`; c.appendChild(node); }); }
-      window.genAct = async (id)=>{ await safeFetch('/api/activities/generate/'+id,{method:'POST'}); alert('Activité générée'); }
-      window.editChap = async (id,title)=>{ const t = prompt('Titre', title); if(t===null) return; const c = prompt('Contenu'); if(c===null) return; const d = prompt('Durée'); if(d===null) return; await safeFetch('/api/chapitres/'+id,{method:'PUT',body:JSON.stringify({ Title:t, Content:c, Duree: parseFloat(d) })}); await loadChapitres(); }
-      window.delChap = async (id)=>{ if(!confirm('Supprimer ?')) return; await safeFetch('/api/chapitres/'+id,{method:'DELETE'}); await loadChapitres(); }
-      await loadChapitres();
-    }
+      async function loadChapitres(){ const r=await safeFetch('/api/chapitres'); const list=await r.json(); const c=document.getElementById('chap-list'); c.innerHTML=''; list.forEach(ch=>{ const node=document.createElement('div'); node.className='item'; node.innerHTML=`<div><strong>${escapeHtml(ch.title)}</strong><div class="meta">Durée: ${ch.duree} • ModuleId: ${ch.moduleId ?? ''}</div></div><div><button class="btn-muted" onclick="openGenPrompt(${ch.id},'${escapeJs(ch.title)}')">Générer activité</button><button class="btn-muted" onclick="editChap(${ch.id},'${escapeJs(ch.title)}')">Éditer</button><button class="danger" onclick="delChap(${ch.id})">Supprimer</button></div>`; c.appendChild(node); }); }
+      document.openGenPrompt = undefined;
+      window.openGenPrompt = function(chapId, chapTitle){
+        const modal = document.getElementById('llm-modal');
+        document.getElementById('llm-prompt').value = `Génère une activité pédagogique pour le chapitre "${chapTitle}". Donner un titre et des instructions claires.`;
+        modal.style.display = 'flex';
+        _pendingGenChapId = chapId;
+      }
+      document.getElementById('llm-cancel').addEventListener('click', ()=>{ document.getElementById('llm-modal').style.display='none'; _pendingGenChapId=null; document.getElementById('llm-status').textContent=''; });
+      document.getElementById('llm-submit').addEventListener('click', async ()=>{
+        const prompt = document.getElementById('llm-prompt').value.trim(); if(!prompt) { alert('Prompt requis'); return; }
+        const btn = document.getElementById('llm-submit'); btn.disabled = true; document.getElementById('llm-status').innerHTML = '<span class="spinner"></span> Génération en cours...';
+        try{
+          const resp = await safeFetch('/api/activities/generate/' + _pendingGenChapId, { method: 'POST', body: JSON.stringify({ Prompt: prompt }) });
+          const created = await resp.json();
+          document.getElementById('llm-status').textContent = 'Activité générée: ' + created.title;
+          // refresh chapters list and activities
+          await loadChapitres();
+          // hide after short delay
+          setTimeout(()=>{ document.getElementById('llm-modal').style.display='none'; document.getElementById('llm-status').textContent=''; _pendingGenChapId=null; }, 900);
+        }catch(e){ console.error(e); document.getElementById('llm-status').textContent = 'Erreur lors de la génération'; }
+        finally{ btn.disabled = false; }
+      });
 
     // --- ACTIVITIES ---
     async function renderActivities(){ content.innerHTML=''; const s=document.createElement('div'); s.className='sect'; s.innerHTML=`<h2>Activités</h2>
