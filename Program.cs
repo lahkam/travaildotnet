@@ -33,6 +33,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Ensure database created for local development (LocalDB)
+using (var scope = app.Services.CreateScope())
+{
+    var ctx = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+    ctx.Database.EnsureCreated();
+}
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
